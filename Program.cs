@@ -38,7 +38,7 @@ namespace Szeminarium1
             FragColor = outCol;
         }
         ";
-
+        //ez egy komment
         static void Main(string[] args)
         {
             WindowOptions windowOptions = WindowOptions.Default;
