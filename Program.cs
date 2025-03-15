@@ -22,7 +22,9 @@ namespace Szeminarium1
         void main()
         {
 			outCol = vCol;
-            gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            //gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            gl_Position = vec4(vPos.x, vPos.y, 1.0);
+            // Unhandled Exception: System.Exception: Vertex shader failed to compile: ERROR: 0:13: 'constructor' : not enough data provided for construction
         }
         ";
 
@@ -75,6 +77,11 @@ namespace Szeminarium1
             Gl.ShaderSource(fshader, FragmentShaderSource);
             Gl.CompileShader(fshader);
 
+            //kiegeszites, hibakezeles
+            Gl.GetShader(fshader, ShaderParameterName.CompileStatus, out int fStatus);
+            if (fStatus != (int)GLEnum.True)
+                throw new Exception("Fragment shader failed to compile: " + Gl.GetShaderInfoLog(vshader));
+
             program = Gl.CreateProgram();
             Gl.AttachShader(program, vshader);
             Gl.AttachShader(program, fshader);
@@ -90,6 +97,15 @@ namespace Szeminarium1
                 Console.WriteLine($"Error linking shader {Gl.GetProgramInfoLog(program)}");
             }
 
+        }
+
+        private static void CheckGLError(string function)
+        {
+            GLEnum errorCode = Gl.GetError();
+            if(errorCode != GLEnum.NoError)
+            {
+                Console.WriteLine($"Error after {function} {errorCode}");
+            }
         }
 
         private static void GraphicWindow_Update(double deltaTime)
@@ -110,9 +126,9 @@ namespace Szeminarium1
 
             float[] vertexArray = new float[] {
                 -0.5f, -0.5f, 0.0f,
-                +0.5f, -0.5f, 0.0f,
-                 0.0f, +0.5f, 0.0f,
-                 1f, 1f, 0f
+                0.5f, -0.5f, 0.0f,
+                0.0f, 0.5f, 0.0f,
+                1f, 1f, 0f
             };
 
             float[] colorArray = new float[] {
@@ -132,24 +148,28 @@ namespace Szeminarium1
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)vertexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, null);
             Gl.EnableVertexAttribArray(0);
+            CheckGLError("binding the vertices");
 
             uint colors = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, colors);
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)colorArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, null);
             Gl.EnableVertexAttribArray(1);
+            CheckGLError("binding the colors");
 
             uint indices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, indices);
             Gl.BufferData(GLEnum.ElementArrayBuffer, (ReadOnlySpan<uint>)indexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.BindBuffer(GLEnum.ArrayBuffer, 0);
             Gl.UseProgram(program);
+            CheckGLError("binding the indices");
 
             Gl.DrawElements(GLEnum.Triangles, (uint)indexArray.Length, GLEnum.UnsignedInt, null); // we used element buffer
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
             Gl.BindVertexArray(vao);
+            CheckGLError("binding the vertex array");
 
-            // always unbound the vertex buffer first, so no halfway results are displayed by accident
+            //always unbound the vertex buffer first, so no halfway results are displayed by accident
             Gl.DeleteBuffer(vertices);
             Gl.DeleteBuffer(colors);
             Gl.DeleteBuffer(indices);
