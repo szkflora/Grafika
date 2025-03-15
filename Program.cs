@@ -22,8 +22,8 @@ namespace Szeminarium1
         void main()
         {
 			outCol = vCol;
-            //gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
-            gl_Position = vec4(vPos.x, vPos.y, 1.0);
+            gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            //gl_Position = vec4(vPos.x, vPos.y, 1.0);
             // Unhandled Exception: System.Exception: Vertex shader failed to compile: ERROR: 0:13: 'constructor' : not enough data provided for construction
         }
         ";
@@ -144,7 +144,7 @@ namespace Szeminarium1
             };
 
             uint vertices = Gl.GenBuffer();
-            Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
+            //Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)vertexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, null);
             Gl.EnableVertexAttribArray(0);
