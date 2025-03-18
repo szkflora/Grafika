@@ -377,7 +377,7 @@ namespace Szeminarium1
                 42, 43, 44,
                 43, 44, 45,
                 44, 45, 46,
-                45, 46, 47
+                45, //46, 47
             };
 
             uint vertices = Gl.GenBuffer();
