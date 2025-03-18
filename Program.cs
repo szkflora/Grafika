@@ -377,14 +377,14 @@ namespace Szeminarium1
                 42, 43, 44,
                 43, 44, 45,
                 44, 45, 46,
-                45, //46, 47
+                45, 46, 47
             };
 
             uint vertices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)vertexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, null);
-            Gl.EnableVertexAttribArray(0);
+            Gl.EnableVertexAttribArray(1);
             CheckGLError("binding the vertices");
 
             uint colors = Gl.GenBuffer();
