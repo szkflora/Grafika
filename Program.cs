@@ -91,7 +91,7 @@ namespace GrafikaSzeminarium
             }
 
             cube1 = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
-            cube2 = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
+            cube2 = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray2);
 
             Gl.ClearColor(System.Drawing.Color.White);
 
@@ -188,7 +188,7 @@ namespace GrafikaSzeminarium
 
             var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
             SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
-            DrawModelObject(cube1);
+            DrawModelObject(cube2);
 
             //Matrix4X4<float> diamondScale = Matrix4X4.CreateScale(0.25f);
             //Matrix4X4<float> rotx = Matrix4X4.CreateRotationX((float)Math.PI / 4f);
@@ -200,9 +200,9 @@ namespace GrafikaSzeminarium
             //SetMatrix(dimondCubeModelMatrix, ModelMatrixVariableName);
             //DrawModelObject(cube);
 
-            Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(0f, 0f, 1.1f);
-            SetMatrix(trans1, ModelMatrixVariableName);
-            DrawModelObject(cube2);
+            //Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(0f, 0f, 1.1f);
+            //SetMatrix(trans1, ModelMatrixVariableName);
+            //DrawModelObject(cube2);
         }
 
         private static unsafe void DrawModelObject(ModelObjectDescriptor modelObject)
