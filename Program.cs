@@ -14,7 +14,7 @@ namespace GrafikaSzeminarium
 
         private static GL Gl;
 
-        private static ModelObjectDescriptor cube1, cube2;
+        private static ModelObjectDescriptor cube1, cube2, cube3;
 
         private static CameraDescriptor camera = new CameraDescriptor();
 
