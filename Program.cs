@@ -92,10 +92,10 @@ namespace GrafikaSzeminarium
                 keyboard.KeyDown += Keyboard_KeyDown;
             }
 
-            for(int i = 0; i < 27; i++)
-            {
-                cubes[i] = new ModelObjectDescriptor();
-            }
+            //for(int i = 0; i < 27; i++)
+            //{
+            //    cubes[i] = new ModelObjectDescriptor();
+            //}
 
             cubes[0] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
             cubes[1] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray2);
