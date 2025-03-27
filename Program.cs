@@ -14,7 +14,7 @@ namespace GrafikaSzeminarium
 
         private static GL Gl;
 
-        private static ModelObjectDescriptor cube1, cube2;
+        private static ModelObjectDescriptor[] cubes = new ModelObjectDescriptor[27];
 
         private static CameraDescriptor camera = new CameraDescriptor();
 
@@ -75,8 +75,10 @@ namespace GrafikaSzeminarium
 
         private static void GraphicWindow_Closing()
         {
-            cube1.Dispose();
-            cube2.Dispose();
+            for(int i = 0; i < 27; i++)
+            {
+                cubes[i].Dispose();
+            }
             Gl.DeleteProgram(program);
         }
 
@@ -90,8 +92,14 @@ namespace GrafikaSzeminarium
                 keyboard.KeyDown += Keyboard_KeyDown;
             }
 
-            cube1 = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
-            cube2 = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray2);
+            for(int i = 0; i < 27; i++)
+            {
+                cubes[i] = new ModelObjectDescriptor();
+            }
+
+            cubes[0] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
+            cubes[1] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray2);
+            cubes[2] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray3);
 
             Gl.ClearColor(System.Drawing.Color.White);
 
@@ -188,7 +196,8 @@ namespace GrafikaSzeminarium
 
             var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
             SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
-            DrawModelObject(cube2);
+            // kozep kozep kozep
+            DrawModelObject(cubes[0]);
 
             //Matrix4X4<float> diamondScale = Matrix4X4.CreateScale(0.25f);
             //Matrix4X4<float> rotx = Matrix4X4.CreateRotationX((float)Math.PI / 4f);
@@ -200,9 +209,15 @@ namespace GrafikaSzeminarium
             //SetMatrix(dimondCubeModelMatrix, ModelMatrixVariableName);
             //DrawModelObject(cube);
 
-            //Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(0f, 0f, 1.1f);
-            //SetMatrix(trans1, ModelMatrixVariableName);
-            //DrawModelObject(cube2);
+            // bal also hatso
+            Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, -1.1f);
+            SetMatrix(trans1, ModelMatrixVariableName);
+            DrawModelObject(cubes[1]);
+
+            // bal also kozep
+            Matrix4X4<float> trans2 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 0f);
+            SetMatrix(trans2, ModelMatrixVariableName);
+            DrawModelObject(cubes[2]);
         }
 
         private static unsafe void DrawModelObject(ModelObjectDescriptor modelObject)
