@@ -100,6 +100,30 @@ namespace GrafikaSzeminarium
             cubes[0] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray1);
             cubes[1] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray2);
             cubes[2] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray3);
+            cubes[3] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray4);
+            cubes[4] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray5);
+            cubes[5] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray6);
+            cubes[6] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray7);
+            cubes[7] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray8);
+            cubes[8] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray9);
+            cubes[9] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray10);
+            cubes[10] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray11);
+            cubes[11] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray12);
+            cubes[12] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray13);
+            cubes[13] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray14);
+            cubes[14] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray15);
+            cubes[15] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray16);
+            cubes[16] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray17);
+            cubes[17] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray18);
+            cubes[18] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray19);
+            cubes[19] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray20);
+            cubes[20] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray21);
+            cubes[21] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray22);
+            cubes[22] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray23);
+            cubes[23] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray24);
+            cubes[24] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray25);
+            cubes[25] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray26);
+            cubes[26] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray27);
 
             Gl.ClearColor(System.Drawing.Color.White);
 
@@ -218,6 +242,126 @@ namespace GrafikaSzeminarium
             Matrix4X4<float> trans2 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 0f);
             SetMatrix(trans2, ModelMatrixVariableName);
             DrawModelObject(cubes[2]);
+
+            // bal also elulso
+            Matrix4X4<float> trans3 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 1.1f);
+            SetMatrix(trans3, ModelMatrixVariableName);
+            DrawModelObject(cubes[3]);
+
+            // bal kozep hatso
+            Matrix4X4<float> trans4 = Matrix4X4.CreateTranslation(-1.1f, 0f, -1.1f);
+            SetMatrix(trans4, ModelMatrixVariableName);
+            DrawModelObject(cubes[4]);
+
+            // bal kozep kozep
+            Matrix4X4<float> trans5 = Matrix4X4.CreateTranslation(-1.1f, 0f, 0f);
+            SetMatrix(trans5, ModelMatrixVariableName);
+            DrawModelObject(cubes[5]);
+
+            // bal kozep elulso
+            Matrix4X4<float> trans6 = Matrix4X4.CreateTranslation(-1.1f, 0f, 1.1f);
+            SetMatrix(trans6, ModelMatrixVariableName);
+            DrawModelObject(cubes[6]);
+
+            // bal felso hatso
+            Matrix4X4<float> trans7 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, -1.1f);
+            SetMatrix(trans7, ModelMatrixVariableName);
+            DrawModelObject(cubes[7]);
+
+            // bal felso kozep
+            Matrix4X4<float> trans8 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 0f);
+            SetMatrix(trans8, ModelMatrixVariableName);
+            DrawModelObject(cubes[8]);
+
+            // bal felso elulso
+            Matrix4X4<float> trans9 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 1.1f);
+            SetMatrix(trans9, ModelMatrixVariableName);
+            DrawModelObject(cubes[9]);
+
+            // kozep also hatso
+            Matrix4X4<float> trans10 = Matrix4X4.CreateTranslation(0f, -1.1f, -1.1f);
+            SetMatrix(trans10, ModelMatrixVariableName);
+            DrawModelObject(cubes[10]);
+
+            // kozep also kozep
+            Matrix4X4<float> trans11 = Matrix4X4.CreateTranslation(0f, -1.1f, 0f);
+            SetMatrix(trans11, ModelMatrixVariableName);
+            DrawModelObject(cubes[11]);
+
+            // kozep also elulso
+            Matrix4X4<float> trans12 = Matrix4X4.CreateTranslation(0f, -1.1f, 1.1f);
+            SetMatrix(trans12, ModelMatrixVariableName);
+            DrawModelObject(cubes[12]);
+
+            // kozep kozep hatso
+            Matrix4X4<float> trans13 = Matrix4X4.CreateTranslation(0f, 0f, -1.1f);
+            SetMatrix(trans13, ModelMatrixVariableName);
+            DrawModelObject(cubes[13]);
+
+            // kozep kozep elulso
+            Matrix4X4<float> trans14 = Matrix4X4.CreateTranslation(0f, 0f, 1.1f);
+            SetMatrix(trans14, ModelMatrixVariableName);
+            DrawModelObject(cubes[14]);
+
+            // kozep felso hatso
+            Matrix4X4<float> trans15 = Matrix4X4.CreateTranslation(0f, 1.1f, -1.1f);
+            SetMatrix(trans15, ModelMatrixVariableName);
+            DrawModelObject(cubes[15]);
+
+            // kozep felso kozep
+            Matrix4X4<float> trans16 = Matrix4X4.CreateTranslation(0f, 1.1f, 0f);
+            SetMatrix(trans16, ModelMatrixVariableName);
+            DrawModelObject(cubes[16]);
+
+            // kozep felso elulso
+            Matrix4X4<float> trans17 = Matrix4X4.CreateTranslation(0f, 1.1f, 1.1f);
+            SetMatrix(trans17, ModelMatrixVariableName);
+            DrawModelObject(cubes[17]);
+
+            // jobb also hatso
+            Matrix4X4<float> trans18 = Matrix4X4.CreateTranslation(1.1f, -1.1f, -1.1f);
+            SetMatrix(trans18, ModelMatrixVariableName);
+            DrawModelObject(cubes[18]);
+
+            // jobb also kozep
+            Matrix4X4<float> trans19 = Matrix4X4.CreateTranslation(1.1f, -1.1f, 0f);
+            SetMatrix(trans19, ModelMatrixVariableName);
+            DrawModelObject(cubes[19]);
+
+            // jobb also elulso
+            Matrix4X4<float> trans20 = Matrix4X4.CreateTranslation(1.1f, -1.1f, 1.1f);
+            SetMatrix(trans20, ModelMatrixVariableName);
+            DrawModelObject(cubes[20]);
+
+            // jobb kozep hatso
+            Matrix4X4<float> trans21 = Matrix4X4.CreateTranslation(1.1f, 0f, -1.1f);
+            SetMatrix(trans21, ModelMatrixVariableName);
+            DrawModelObject(cubes[21]);
+
+            // jobb kozep kozep
+            Matrix4X4<float> trans22 = Matrix4X4.CreateTranslation(1.1f, 0f, 0f);
+            SetMatrix(trans22, ModelMatrixVariableName);
+            DrawModelObject(cubes[22]);
+
+            // jobb kozep elulso
+            Matrix4X4<float> trans23 = Matrix4X4.CreateTranslation(1.1f, 0f, 1.1f);
+            SetMatrix(trans23, ModelMatrixVariableName);
+            DrawModelObject(cubes[23]);
+
+            // jobb felso hatso
+            Matrix4X4<float> trans24 = Matrix4X4.CreateTranslation(1.1f, 1.1f, -1.1f);
+            SetMatrix(trans24, ModelMatrixVariableName);
+            DrawModelObject(cubes[24]);
+
+            // jobb felso kozep
+            Matrix4X4<float> trans25 = Matrix4X4.CreateTranslation(1.1f, 1.1f, 0f);
+            SetMatrix(trans25, ModelMatrixVariableName);
+            DrawModelObject(cubes[25]);
+
+            // jobb felso elulso
+            Matrix4X4<float> trans26 = Matrix4X4.CreateTranslation(1.1f, 1.1f, 1.1f);
+            SetMatrix(trans26, ModelMatrixVariableName);
+            DrawModelObject(cubes[26]);
         }
 
         private static unsafe void DrawModelObject(ModelObjectDescriptor modelObject)
