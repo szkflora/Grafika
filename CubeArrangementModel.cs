@@ -31,7 +31,8 @@ namespace Szeminarium
         /// <summary>
         /// The angle with which the diamond cube is rotated around the global Y axes.
         /// </summary>
-        public double DiamondCubeGlobalYAngle { get; private set; } = 0;
+        //public double DiamondCubeGlobalYAngle { get; private set; } = 0;
+        public float GlobalRotationX { get; set; } = 0;
 
         internal void AdvanceTime(double deltaTime)
         {
@@ -46,9 +47,9 @@ namespace Szeminarium
             CenterCubeScale = 1 + 0.2 * Math.Sin(1.5 * Time);
 
             // the rotation angle is time x angular velocity;
-            DiamondCubeLocalAngle = Time * 10;
+            //DiamondCubeLocalAngle = Time * 10;
 
-            DiamondCubeGlobalYAngle = -Time;
+            //DiamondCubeGlobalYAngle = -Time;
         }
     }
 }

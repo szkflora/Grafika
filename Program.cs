@@ -168,15 +168,6 @@ namespace GrafikaSzeminarium
                 Console.WriteLine($"Error linking shader {Gl.GetProgramInfoLog(program)}");
             }
 
-            var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
-            SetMatrix(viewMatrix, ViewMatrixVariableName);
-
-            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
-            SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
-
-
-            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
         }
 
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
@@ -202,7 +193,7 @@ namespace GrafikaSzeminarium
                     camera.DecreaseZXAngle();
                     break;
                 case Key.Space:
-                    cubeArrangementModel.AnimationEnabled = !cubeArrangementModel.AnimationEnabled;
+                    cubeArrangementModel.GlobalRotationX += 90;
                     break;
             }
         }
@@ -221,15 +212,16 @@ namespace GrafikaSzeminarium
 
             Gl.UseProgram(program);
 
-            //var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
-            //SetMatrix(viewMatrix, ViewMatrixVariableName);
+            var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
+            SetMatrix(viewMatrix, ViewMatrixVariableName);
 
-            //var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
-            //SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
+            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
+            SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
 
 
-            //var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            //SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
+            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
+
             // kozep kozep kozep
             DrawModelObject(cubes[0]);
 
@@ -243,49 +235,52 @@ namespace GrafikaSzeminarium
             //SetMatrix(dimondCubeModelMatrix, ModelMatrixVariableName);
             //DrawModelObject(cube);
 
+            //float angle = (float)(Math.PI / 2);
+            Matrix4X4<float> rotationMatrix = Matrix4X4.CreateRotationX(cubeArrangementModel.GlobalRotationX);
+
             // bal also hatso
             Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, -1.1f);
-            SetMatrix(trans1, ModelMatrixVariableName);
+            SetMatrix(trans1 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[1]);
 
             // bal also kozep
             Matrix4X4<float> trans2 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 0f);
-            SetMatrix(trans2, ModelMatrixVariableName);
+            SetMatrix(trans2 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[2]);
 
             // bal also elulso
             Matrix4X4<float> trans3 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 1.1f);
-            SetMatrix(trans3, ModelMatrixVariableName);
+            SetMatrix(trans3 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[3]);
 
             // bal kozep hatso
             Matrix4X4<float> trans4 = Matrix4X4.CreateTranslation(-1.1f, 0f, -1.1f);
-            SetMatrix(trans4, ModelMatrixVariableName);
+            SetMatrix(trans4 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[4]);
 
             // bal kozep kozep
             Matrix4X4<float> trans5 = Matrix4X4.CreateTranslation(-1.1f, 0f, 0f);
-            SetMatrix(trans5, ModelMatrixVariableName);
+            SetMatrix(trans5 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[5]);
 
             // bal kozep elulso
             Matrix4X4<float> trans6 = Matrix4X4.CreateTranslation(-1.1f, 0f, 1.1f);
-            SetMatrix(trans6, ModelMatrixVariableName);
+            SetMatrix(trans6 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[6]);
 
             // bal felso hatso
             Matrix4X4<float> trans7 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, -1.1f);
-            SetMatrix(trans7, ModelMatrixVariableName);
+            SetMatrix(trans7 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[7]);
 
             // bal felso kozep
             Matrix4X4<float> trans8 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 0f);
-            SetMatrix(trans8, ModelMatrixVariableName);
+            SetMatrix(trans8 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[8]);
 
             // bal felso elulso
             Matrix4X4<float> trans9 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 1.1f);
-            SetMatrix(trans9, ModelMatrixVariableName);
+            SetMatrix(trans9 * rotationMatrix, ModelMatrixVariableName);
             DrawModelObject(cubes[9]);
 
             // kozep also hatso
