@@ -22,7 +22,8 @@ namespace Szeminarium
         {
             get
             {
-                return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
+                //return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
+                return new Vector3D<float>(3f, 3f, 3f);
             }
         }
 

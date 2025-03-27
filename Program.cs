@@ -167,6 +167,16 @@ namespace GrafikaSzeminarium
             {
                 Console.WriteLine($"Error linking shader {Gl.GetProgramInfoLog(program)}");
             }
+
+            var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
+            SetMatrix(viewMatrix, ViewMatrixVariableName);
+
+            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
+            SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
+
+
+            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
         }
 
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
@@ -211,15 +221,15 @@ namespace GrafikaSzeminarium
 
             Gl.UseProgram(program);
 
-            var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
-            SetMatrix(viewMatrix, ViewMatrixVariableName);
+            //var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
+            //SetMatrix(viewMatrix, ViewMatrixVariableName);
 
-            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
-            SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
+            //var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
+            //SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
 
 
-            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
+            //var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            //SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
             // kozep kozep kozep
             DrawModelObject(cubes[0]);
 
@@ -375,6 +385,8 @@ namespace GrafikaSzeminarium
 
         private static unsafe void SetMatrix(Matrix4X4<float> mx, string uniformName)
         {
+            Gl.UseProgram(program);
+
             int location = Gl.GetUniformLocation(program, uniformName);
             if (location == -1)
             {
