@@ -195,6 +195,11 @@ namespace GrafikaSzeminarium
                 case Key.Space:
                     //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);
                     cubeArrangementModel.AnimationEnabled = true;
+                    cubeArrangementModel.Forward = true;
+                    break;
+                case Key.Backspace:
+                    cubeArrangementModel.AnimationEnabled = true;
+                    cubeArrangementModel.Forward = false;
                     break;
             }
         }
@@ -278,6 +283,7 @@ namespace GrafikaSzeminarium
             // bal felso kozep
             Matrix4X4<float> trans8 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 0f);
             SetMatrix(trans8 * rotationMatrix, ModelMatrixVariableName);
+            DrawModelObject(cubes[8]);
             DrawModelObject(cubes[8]);
 
             // bal felso elulso

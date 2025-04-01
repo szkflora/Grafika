@@ -7,9 +7,9 @@ namespace Szeminarium
     {
         public double DistanceToOrigin { get; private set; } = 5;
 
-        public double AngleToZYPlane { get; private set; } = 0;
+        public double AngleToZYPlane { get; private set; } = 7;
 
-        public double AngleToZXPlane { get; private set; } = 0;
+        public double AngleToZXPlane { get; private set; } = 7;
 
         const double DistanceScaleFactor = 1.1;
 

@@ -12,6 +12,7 @@ namespace Szeminarium
         /// Gets or sets wheather the animation should run or it should be frozen.
         /// </summary>
         public bool AnimationEnabled { get; set; } = false;
+        public bool Forward { get; set; } = true;
 
         /// <summary>
         /// The time of the simulation. It helps to calculate time dependent values.
@@ -35,6 +36,8 @@ namespace Szeminarium
         /// </summary>
         //public double DiamondCubeGlobalYAngle { get; private set; } = 0;
         public float GlobalRotationX { get; set; } = 0;
+        public float RotationsSoFar { get; set; } = 0;
+        public float CurrentRatation { get; set; } = 0;
 
         internal void AdvanceTime(double deltaTime)
         {
@@ -45,11 +48,21 @@ namespace Szeminarium
             // set a simulation time
             Time += deltaTime;
             progress = Time / AnimationTotalTime;
-            GlobalRotationX = Math.Min((float)(progress * Math.PI / 2), (float)(Math.PI / 2));
+            CurrentRatation = Math.Min((float)(progress * Math.PI / 2), (float)(Math.PI / 2));
+
+            if (Forward)
+            {
+                GlobalRotationX = RotationsSoFar + CurrentRatation;
+            }
+            else
+            {
+                GlobalRotationX = RotationsSoFar - CurrentRatation;
+            }
 
             if (progress >= 1)
             {
                 AnimationEnabled = false;
+                RotationsSoFar = GlobalRotationX;
                 Time = 0;
             }
 
