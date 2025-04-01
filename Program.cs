@@ -193,7 +193,8 @@ namespace GrafikaSzeminarium
                     camera.DecreaseZXAngle();
                     break;
                 case Key.Space:
-                    cubeArrangementModel.GlobalRotationX += 90;
+                    //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);
+                    cubeArrangementModel.AnimationEnabled = true;
                     break;
             }
         }
@@ -207,6 +208,7 @@ namespace GrafikaSzeminarium
 
         private static unsafe void GraphicWindow_Render(double deltaTime)
         {
+
             Gl.Clear(ClearBufferMask.ColorBufferBit);
             Gl.Clear(ClearBufferMask.DepthBufferBit);
 

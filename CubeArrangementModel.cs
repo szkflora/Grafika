@@ -17,6 +17,8 @@ namespace Szeminarium
         /// The time of the simulation. It helps to calculate time dependent values.
         /// </summary>
         private double Time { get; set; } = 0;
+        private double progress;
+        private const double AnimationTotalTime = 2.0;
 
         /// <summary>
         /// The value by which the center cube is scaled. It varies between 0.8 and 1.2 with respect to the original size.
@@ -42,14 +44,22 @@ namespace Szeminarium
 
             // set a simulation time
             Time += deltaTime;
+            progress = Time / AnimationTotalTime;
+            GlobalRotationX = Math.Min((float)(progress * Math.PI / 2), (float)(Math.PI / 2));
+
+            if (progress >= 1)
+            {
+                AnimationEnabled = false;
+                Time = 0;
+            }
 
             // lets produce an oscillating scale in time
-            CenterCubeScale = 1 + 0.2 * Math.Sin(1.5 * Time);
+            //CenterCubeScale = 1 + 0.2 * Math.Sin(1.5 * Time);
 
-            // the rotation angle is time x angular velocity;
-            //DiamondCubeLocalAngle = Time * 10;
+                // the rotation angle is time x angular velocity;
+                //DiamondCubeLocalAngle = Time * 10;
 
-            //DiamondCubeGlobalYAngle = -Time;
+                //DiamondCubeGlobalYAngle = -Time;
         }
     }
 }
