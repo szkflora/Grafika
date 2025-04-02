@@ -60,8 +60,8 @@ namespace GrafikaSzeminarium
         static void Main(string[] args)
         {
             WindowOptions windowOptions = WindowOptions.Default;
-            windowOptions.Title = "Grafika szeminárium";
-            windowOptions.Size = new Silk.NET.Maths.Vector2D<int>(500, 500);
+            windowOptions.Title = "Kockak";
+            windowOptions.Size = new Silk.NET.Maths.Vector2D<int>(700, 700);
 
             graphicWindow = Window.Create(windowOptions);
 
@@ -173,24 +173,35 @@ namespace GrafikaSzeminarium
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
             switch (key)
-            {
+            {   
+                // forgatas y tengely korul
                 case Key.Left:
-                    camera.DecreaseZYAngle();
-                    break;
-                case Key.Right:
-                    camera.IncreaseZYAngle();
-                    break;
-                case Key.Down:
-                    camera.IncreaseDistance();
-                    break;
-                case Key.Up:
-                    camera.DecreaseDistance();
-                    break;
-                case Key.U:
                     camera.IncreaseZXAngle();
                     break;
-                case Key.D:
+                case Key.Right:
                     camera.DecreaseZXAngle();
+                    break;
+                // elore tolas a z tengelyen
+                case Key.Down:
+                    camera.DecreaseDistance();
+                    break;
+                case Key.Up:
+                    camera.IncreaseDistance();
+                    break;
+                // forgatas x tengely korul
+                case Key.U:
+                    //camera.IncreaseZYAngle();
+                    camera.MoveUp();
+                    break;
+                case Key.D:
+                    //camera.DecreaseZYAngle();
+                    camera.MoveDown();
+                    break;
+                case Key.R:
+                    camera.MoveRight();
+                    break;
+                case Key.L:
+                    camera.MoveLeft();
                     break;
                 case Key.Space:
                     //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);

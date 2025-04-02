@@ -11,6 +11,9 @@ namespace Szeminarium
 
         public double AngleToZXPlane { get; private set; } = 7;
 
+        public float XStep { get; private set; } = 0;
+        public float YStep { get; private set; } = 0;
+
         const double DistanceScaleFactor = 1.1;
 
         const double AngleChangeStepSize = Math.PI / 180 * 5;
@@ -22,7 +25,7 @@ namespace Szeminarium
         {
             get
             {
-                return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
+                return GetPointFromAngles(DistanceToOrigin, AngleToZXPlane, AngleToZYPlane) + new Vector3D<float>(XStep, YStep, 0);
             }
         }
 
@@ -33,7 +36,7 @@ namespace Szeminarium
         {
             get
             {
-                return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane + Math.PI / 2));
+                return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZXPlane, AngleToZYPlane + Math.PI / 2));
             }
         }
 
@@ -45,7 +48,7 @@ namespace Szeminarium
             get
             {
                 // For the moment the camera is always pointed at the origin.
-                return Vector3D<float>.Zero;
+                return new Vector3D<float>(XStep, YStep, 0);
             }
         }
 
@@ -79,12 +82,31 @@ namespace Szeminarium
         {
             DistanceToOrigin = DistanceToOrigin / DistanceScaleFactor;
         }
+        public void MoveRight()
+        {
+            XStep -= 0.5f;
+        }
 
-        private static Vector3D<float> GetPointFromAngles(double distanceToOrigin, double angleToMinZYPlane, double angleToMinZXPlane)
+        public void MoveLeft()
+        {
+            XStep += 0.5f;
+        }
+
+        public void MoveUp()
+        {
+            YStep -= 0.5f;
+        }
+
+        public void MoveDown()
+        {
+            YStep += 0.5f;
+        }
+        private Vector3D<float> GetPointFromAngles(double distanceToOrigin, double angleToMinZYPlane, double angleToMinZXPlane)
         {
             var x = distanceToOrigin * Math.Cos(angleToMinZXPlane) * Math.Sin(angleToMinZYPlane);
             var z = distanceToOrigin * Math.Cos(angleToMinZXPlane) * Math.Cos(angleToMinZYPlane);
             var y = distanceToOrigin * Math.Sin(angleToMinZXPlane);
+
 
             return new Vector3D<float>((float)x, (float)y, (float)z);
         }
