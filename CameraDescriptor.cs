@@ -84,22 +84,22 @@ namespace Szeminarium
         }
         public void MoveRight()
         {
-            XStep -= 0.5f;
+            XStep += 0.5f;
         }
 
         public void MoveLeft()
         {
-            XStep += 0.5f;
+            XStep -= 0.5f;
         }
 
         public void MoveUp()
         {
-            YStep -= 0.5f;
+            YStep += 0.5f;
         }
 
         public void MoveDown()
         {
-            YStep += 0.5f;
+            YStep -= 0.5f;
         }
         private Vector3D<float> GetPointFromAngles(double distanceToOrigin, double angleToMinZYPlane, double angleToMinZXPlane)
         {

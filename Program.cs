@@ -176,10 +176,10 @@ namespace GrafikaSzeminarium
             {   
                 // forgatas y tengely korul
                 case Key.Left:
-                    camera.IncreaseZXAngle();
+                    camera.DecreaseZXAngle();
                     break;
                 case Key.Right:
-                    camera.DecreaseZXAngle();
+                    camera.IncreaseZXAngle();
                     break;
                 // elore tolas a z tengelyen
                 case Key.Down:
@@ -189,19 +189,19 @@ namespace GrafikaSzeminarium
                     camera.IncreaseDistance();
                     break;
                 // forgatas x tengely korul
-                case Key.U:
-                    //camera.IncreaseZYAngle();
-                    camera.MoveUp();
-                    break;
                 case Key.D:
-                    //camera.DecreaseZYAngle();
+                    //camera.IncreaseZYAngle();
                     camera.MoveDown();
                     break;
-                case Key.R:
-                    camera.MoveRight();
+                case Key.U:
+                    //camera.DecreaseZYAngle();
+                    camera.MoveUp();
                     break;
                 case Key.L:
                     camera.MoveLeft();
+                    break;
+                case Key.R:
+                    camera.MoveRight();
                     break;
                 case Key.Space:
                     //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);
