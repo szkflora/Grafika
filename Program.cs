@@ -173,10 +173,15 @@ namespace GrafikaSzeminarium
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
             switch (key)
-            {   
+            {
+                case Key.C:
+                    //camera.DecreaseZXAngle();
+                    camera.RotateInPlace = true;
+                    break;
                 // forgatas y tengely korul
                 case Key.Left:
                     camera.DecreaseZXAngle();
+                    //camera.RotateLeft();
                     break;
                 case Key.Right:
                     camera.IncreaseZXAngle();
@@ -202,6 +207,18 @@ namespace GrafikaSzeminarium
                     break;
                 case Key.R:
                     camera.MoveRight();
+                    break;
+                case Key.I:
+                    camera.RotateRight();
+                    break;
+                case Key.J:
+                    camera.RotateLeft();
+                    break;
+                case Key.M:
+                    camera.RotateUp();
+                    break;
+                case Key.N:
+                    camera.RotateDown();
                     break;
                 case Key.Space:
                     //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);

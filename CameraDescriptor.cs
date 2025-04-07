@@ -15,8 +15,22 @@ namespace Szeminarium
         public float YStep { get; private set; } = 0;
 
         const double DistanceScaleFactor = 1.1;
-
+        
         const double AngleChangeStepSize = Math.PI / 180 * 5;
+
+        public bool RotateInPlace { get; set; } = false;
+
+        /// <summary>
+        /// Y axes rotation
+        /// </summary>
+        public double Yaw { get; private set; } = Math.PI;
+
+        /// <summary>
+        /// X axes rotation
+        /// </summary>
+        public double Pitch { get; private set; } = -Math.PI / 4;
+
+        private const double RotationStep = Math.PI / 180 * 5;
 
         /// <summary>
         /// Gets the position of the camera.
@@ -36,7 +50,13 @@ namespace Szeminarium
         {
             get
             {
-                return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZXPlane, AngleToZYPlane + Math.PI / 2));
+                if (!RotateInPlace)
+                {
+                    return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZXPlane, AngleToZYPlane + Math.PI / 2));
+                }
+
+                /// Approximation: Y-up world
+                return new Vector3D<float>(0, 1, 0);
             }
         }
 
@@ -47,8 +67,18 @@ namespace Szeminarium
         {
             get
             {
-                // For the moment the camera is always pointed at the origin.
-                return new Vector3D<float>(XStep, YStep, 0);
+                if (!RotateInPlace)
+                {
+                    return new Vector3D<float>(XStep, YStep, 0);
+                }
+
+                /// rotate in place
+                var x = (float)(Math.Cos(Pitch) * Math.Sin(Yaw));
+                var y = (float)(Math.Sin(Pitch));
+                var z = (float)(Math.Cos(Pitch) * Math.Cos(Yaw));
+
+                var direction = new Vector3D<float>(x, y, z);
+                return Position + direction;
             }
         }
 
@@ -101,12 +131,33 @@ namespace Szeminarium
         {
             YStep -= 0.5f;
         }
+
+        public void RotateLeft()
+        {
+            Yaw -= RotationStep;
+        }
+
+        public void RotateRight()
+        {
+            Yaw += RotationStep;
+        }
+
+        public void RotateUp()
+        {
+            Pitch += RotationStep;
+            Pitch = Math.Max(-Math.PI / 2, Math.Min(Pitch, Math.PI / 2));
+        }
+
+        public void RotateDown()
+        {
+            Pitch -= RotationStep;
+            Pitch = Math.Max(-Math.PI / 2, Math.Min(Pitch, Math.PI / 2));
+        }
         private Vector3D<float> GetPointFromAngles(double distanceToOrigin, double angleToMinZYPlane, double angleToMinZXPlane)
         {
             var x = distanceToOrigin * Math.Cos(angleToMinZXPlane) * Math.Sin(angleToMinZYPlane);
-            var z = distanceToOrigin * Math.Cos(angleToMinZXPlane) * Math.Cos(angleToMinZYPlane);
             var y = distanceToOrigin * Math.Sin(angleToMinZXPlane);
-
+            var z = distanceToOrigin * Math.Cos(angleToMinZXPlane) * Math.Cos(angleToMinZYPlane);
 
             return new Vector3D<float>((float)x, (float)y, (float)z);
         }
