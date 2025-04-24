@@ -30,11 +30,10 @@ namespace GrafikaSzeminarium
             float[] vertexArray = new float[] {
 
                 // front face
-                -0.5f, 0.75f, (float)Math.Sin(10.0 * Math.PI / 180.0), 0f, 0f, 1f,
-                -0.5f, -0.75f, (float)Math.Sin(10.0 * Math.PI / 180.0), 0f, 0f, 1f,
-                0.5f, -0.75f, (float)Math.Sin(10.0 * Math.PI / 180.0), 0f, 0f, 1f,
-                0.5f, 0.75f, (float)Math.Sin(10.0 * Math.PI / 180.0), 0f, 0f, 1f,
-
+                -0.5f, 0.75f, 0.5f * ((float)Math.Sin(80.0 * Math.PI / 180.0)) / ((float)Math.Sin(10.0 * Math.PI / 180.0)), 0f, 0f, 1f,
+                -0.5f, -0.75f, 0.5f * ((float)Math.Sin(80.0 * Math.PI / 180.0)) / ((float)Math.Sin(10.0 * Math.PI / 180.0)), 0f, 0f, 1f,
+                0.5f, -0.75f, 0.5f * ((float)Math.Sin(80.0 * Math.PI / 180.0)) / ((float)Math.Sin(10.0 * Math.PI / 180.0)), 0f, 0f, 1f,
+                0.5f, 0.75f, 0.5f * ((float)Math.Sin(80.0 * Math.PI / 180.0)) / ((float)Math.Sin(10.0 * Math.PI / 180.0)), 0f, 0f, 1f,
             };
 
             float[] colorArray = new float[] {
