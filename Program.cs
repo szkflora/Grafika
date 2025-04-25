@@ -17,7 +17,7 @@ namespace GrafikaSzeminarium
 
         private static ImGuiController imGuiController;
 
-        private static ModelObjectDescriptor side;
+        private static ModelObjectDescriptor side, side2;
 
         private static CameraDescriptor camera = new CameraDescriptor();
 
@@ -57,6 +57,7 @@ namespace GrafikaSzeminarium
         private static void GraphicWindow_Closing()
         {
             side.Dispose();
+            side2.Dispose();
             Gl.DeleteProgram(program);
         }
 
@@ -81,7 +82,8 @@ namespace GrafikaSzeminarium
 
             imGuiController = new ImGuiController(Gl, graphicWindow, inputContext);
 
-            side = ModelObjectDescriptor.CreateCube(Gl);
+            side = ModelObjectDescriptor.CreateSides1(Gl);
+            side2 = ModelObjectDescriptor.CreateSides2(Gl);
 
             Gl.ClearColor(System.Drawing.Color.White);
 
@@ -185,7 +187,7 @@ namespace GrafikaSzeminarium
             Gl.UseProgram(program);
 
             SetUniform3(LightColorVariableName, new Vector3(1f, 1f, 1f));
-            SetUniform3(LightPositionVariableName, new Vector3(0f, 1.2f, 0f));
+            SetUniform3(LightPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform3(ViewPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform1(ShinenessVariableName, shininess);
 
@@ -301,6 +303,112 @@ namespace GrafikaSzeminarium
             rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
             SetModelMatrix(rotationMatrix);
             DrawModelObject(side);
+            // 18
+
+            Matrix4X4<float> trans = Matrix4X4.CreateTranslation(0f, -2f, 0f);
+            SetModelMatrix(trans);
+            DrawModelObject(side2);
+
+            angleInRadians = 20f * (float)(System.Math.PI / 180f);
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 2
+
+            angleInRadians *= 2f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 3
+
+            angleInRadians *= 3 / 2f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 4
+
+            angleInRadians *= 4 / 3f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 5
+
+            angleInRadians *= 5 / 4f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 6
+
+            angleInRadians *= 6 / 5f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 7
+
+            angleInRadians *= 7 / 6f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 8
+
+            angleInRadians *= 8 / 7f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 9
+
+            angleInRadians *= 9 / 8f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 10
+
+            angleInRadians *= 10 / 9f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 11
+
+            angleInRadians *= 11 / 10f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 12
+
+            angleInRadians *= 12 / 11f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 13
+
+            angleInRadians *= 13 / 12f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 14
+
+            angleInRadians *= 14 / 13f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 15
+
+            angleInRadians *= 15 / 14f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 16
+
+            angleInRadians *= 16 / 15f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
+            // 17
+
+            angleInRadians *= 17 / 16f;
+            rotationMatrix = Matrix4X4.CreateRotationY(angleInRadians);
+            SetModelMatrix(rotationMatrix * trans);
+            DrawModelObject(side2);
             // 18
 
             //Matrix4X4<float> diamondScale = Matrix4X4.CreateScale(0.25f);
