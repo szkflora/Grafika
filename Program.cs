@@ -37,6 +37,24 @@ namespace GrafikaSzeminarium
 
         private static float shininess = 50;
 
+        private static Vector3 ambientStrength = new Vector3(0.5f, 0.5f, 0.5f);
+        private static Vector3 diffuseStrength = new Vector3(0.5f, 0.5f, 0.5f);
+        private static Vector3 specularStrength = new Vector3(0.5f, 0.5f, 0.5f);
+
+        private static Vector3 lightColor = new Vector3(1f, 1f, 1f);
+        private static int colorIndex = 0;
+        private static Vector3 selectedColor;
+
+        private static Vector3[] colors = new Vector3[]
+        {
+            new Vector3(1f, 0f, 0f), // piros
+            new Vector3(0f, 1f, 0f), // zold
+            new Vector3(1f, 0f, 1f), // lila
+            new Vector3(0f, 1f, 1f), // turkiz
+            new Vector3(0f, 0f, 1f), // kek
+            new Vector3(1f, 1f, 1f), // szurke
+        };
+
         private static uint program;
 
         static void Main(string[] args)
@@ -185,7 +203,12 @@ namespace GrafikaSzeminarium
 
             Gl.UseProgram(program);
 
-            SetUniform3(LightColorVariableName, new Vector3(1f, 1f, 1f));
+            // hozzaadva
+            SetUniform3("ambientStrength", ambientStrength);
+            SetUniform3("diffuseStrength", diffuseStrength);
+            SetUniform3("specularStrength", specularStrength);
+
+            SetUniform3(LightColorVariableName, lightColor);
             SetUniform3(LightPositionVariableName, new Vector3(0f, 1.2f, 0f));
             SetUniform3(ViewPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform1(ShinenessVariableName, shininess);
@@ -213,8 +236,28 @@ namespace GrafikaSzeminarium
 
             //ImGuiNET.ImGui.ShowDemoWindow();
             ImGuiNET.ImGui.Begin("Lighting", ImGuiNET.ImGuiWindowFlags.AlwaysAutoResize | ImGuiNET.ImGuiWindowFlags.NoCollapse);
-            ImGuiNET.ImGui.SliderFloat("Shininess", ref shininess, 5, 100);
+            // ImGuiNET.ImGui.SliderFloat("Shininess", ref shininess, 5, 100);
+
+            ImGuiNET.ImGui.Text("Ambient Strength");
+            ImGuiNET.ImGui.SliderFloat3("Ambient", ref ambientStrength, 0f, 1f);
+
+            ImGuiNET.ImGui.Text("Diffuse Strength");
+            ImGuiNET.ImGui.SliderFloat3("Diffuse", ref diffuseStrength, 0f, 1f);
+
+            ImGuiNET.ImGui.Text("Specular Strength");
+            ImGuiNET.ImGui.SliderFloat3("Specular", ref specularStrength, 0f, 1f);
+
+            ImGuiNET.ImGui.Text("Light Color");
+            ImGuiNET.ImGui.SliderFloat3("Light Color", ref lightColor, 0f, 1f);
+
+            ImGuiNET.ImGui.Text("Cube Front Face Color");
+            string[] colorNames = { "Piros", "Zöld", "Lila", "Türkíz", "Kék", "Szürke" };
+            ImGuiNET.ImGui.Combo("Color", ref colorIndex, colorNames, colorNames.Length);
+
             ImGuiNET.ImGui.End();
+
+            selectedColor = colors[colorIndex];
+            SetUniform3("cubeFrontFaceColor", selectedColor);
 
             imGuiController.Render();
         }
