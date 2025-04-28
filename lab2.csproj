@@ -146,6 +146,8 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Shaders\FragmentShader.frag" />
+    <EmbeddedResource Include="Shaders\VertexShader.vert" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Ultz.Native.GLFW.3.4.0\build\net461\Ultz.Native.GLFW.targets" Condition="Exists('packages\Ultz.Native.GLFW.3.4.0\build\net461\Ultz.Native.GLFW.targets')" />

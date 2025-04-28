@@ -4,6 +4,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
 using System.Numerics;
+using System.Reflection;
 using Szeminarium;
 
 namespace GrafikaSzeminarium
@@ -23,37 +24,6 @@ namespace GrafikaSzeminarium
         private const string ModelMatrixVariableName = "uModel";
         private const string ViewMatrixVariableName = "uView";
         private const string ProjectionMatrixVariableName = "uProjection";
-
-        private static readonly string VertexShaderSource = @"
-        #version 330 core
-        layout (location = 0) in vec3 vPos;
-		layout (location = 1) in vec4 vCol;
-
-        uniform mat4 uModel;
-        uniform mat4 uView;
-        uniform mat4 uProjection;
-
-		out vec4 outCol;
-        
-        void main()
-        {
-			outCol = vCol;
-            gl_Position = uProjection*uView*uModel*vec4(vPos.x, vPos.y, vPos.z, 1.0);
-        }
-        ";
-
-
-        private static readonly string FragmentShaderSource = @"
-        #version 330 core
-        out vec4 FragColor;
-		
-		in vec4 outCol;
-
-        void main()
-        {
-            FragColor = outCol;
-        }
-        ";
 
         private static uint program;
 
@@ -137,13 +107,13 @@ namespace GrafikaSzeminarium
             uint vshader = Gl.CreateShader(ShaderType.VertexShader);
             uint fshader = Gl.CreateShader(ShaderType.FragmentShader);
 
-            Gl.ShaderSource(vshader, VertexShaderSource);
+            Gl.ShaderSource(vshader, GetEmbeddedResourceAsString("Shaders.VertexShader.vert"));
             Gl.CompileShader(vshader);
             Gl.GetShader(vshader, ShaderParameterName.CompileStatus, out int vStatus);
             if (vStatus != (int)GLEnum.True)
                 throw new Exception("Vertex shader failed to compile: " + Gl.GetShaderInfoLog(vshader));
 
-            Gl.ShaderSource(fshader, FragmentShaderSource);
+            Gl.ShaderSource(fshader, GetEmbeddedResourceAsString("Shaders.FragmentShader.frag"));
             Gl.CompileShader(fshader);
             Gl.GetShader(fshader, ShaderParameterName.CompileStatus, out int fStatus);
             if (fStatus != (int)GLEnum.True)
@@ -168,6 +138,18 @@ namespace GrafikaSzeminarium
                 Console.WriteLine($"Error linking shader {Gl.GetProgramInfoLog(program)}");
             }
 
+        }
+
+        private static string GetEmbeddedResourceAsString(string resourceRelativePath)
+        {
+            string resourceFullPath = Assembly.GetExecutingAssembly().GetName().Name + "." + resourceRelativePath;
+
+            using (var resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceFullPath))
+            using (var resStreamReader = new System.IO.StreamReader(resStream))
+            {
+                var text = resStreamReader.ReadToEnd();
+                return text;
+            }
         }
 
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
