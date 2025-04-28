@@ -43,6 +43,7 @@ namespace GrafikaSzeminarium
         private static Vector3 specularStrength = new Vector3(0.5f, 0.5f, 0.5f);
 
         private static Vector3 lightColor = new Vector3(1f, 1f, 1f);
+        private static Vector3 lightPosition = new Vector3(0f, 1.2f, 0f);
 
         private static uint program;
 
@@ -225,15 +226,15 @@ namespace GrafikaSzeminarium
                 case Key.N:
                     camera.RotateDown();
                     break;
-                case Key.Space:
-                    //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);
-                    cubeArrangementModel.AnimationEnabled = true;
-                    cubeArrangementModel.Forward = true;
-                    break;
-                case Key.Backspace:
-                    cubeArrangementModel.AnimationEnabled = true;
-                    cubeArrangementModel.Forward = false;
-                    break;
+                //case Key.Space:
+                //    //cubeArrangementModel.GlobalRotationX += (float)(Math.PI / 2);
+                //    cubeArrangementModel.AnimationEnabled = true;
+                //    cubeArrangementModel.Forward = true;
+                //    break;
+                //case Key.Backspace:
+                //    cubeArrangementModel.AnimationEnabled = true;
+                //    cubeArrangementModel.Forward = false;
+                //    break;
             }
         }
 
@@ -259,7 +260,7 @@ namespace GrafikaSzeminarium
             SetUniform3("specularStrength", specularStrength);
 
             SetUniform3(LightColorVariableName, lightColor);
-            SetUniform3(LightPositionVariableName, new Vector3(0f, 1.2f, 0f));
+            SetUniform3(LightPositionVariableName, lightPosition);
             SetUniform3(ViewPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform1(ShinenessVariableName, shininess);
 
@@ -424,6 +425,26 @@ namespace GrafikaSzeminarium
 
             ImGuiNET.ImGui.Text("Light Color");
             ImGuiNET.ImGui.SliderFloat3("Light Color", ref lightColor, 0f, 1f);
+
+            ImGuiNET.ImGui.InputFloat3("Light source", ref lightPosition);
+
+            ImGuiNET.ImGui.Begin("Camera Controls");
+
+            if (ImGuiNET.ImGui.Button("Rotate Left")) camera.DecreaseZXAngle();
+            ImGuiNET.ImGui.SameLine();
+            if (ImGuiNET.ImGui.Button("Rotate Right")) camera.IncreaseZXAngle();
+
+            if (ImGuiNET.ImGui.Button("Zoom In")) camera.DecreaseDistance();
+            ImGuiNET.ImGui.SameLine();
+            if (ImGuiNET.ImGui.Button("Zoom Out")) camera.IncreaseDistance();
+
+            if (ImGuiNET.ImGui.Button("Move Up")) camera.MoveUp();
+            ImGuiNET.ImGui.SameLine();
+            if (ImGuiNET.ImGui.Button("Move Down")) camera.MoveDown();
+
+            if (ImGuiNET.ImGui.Button("Move Left")) camera.MoveLeft();
+            ImGuiNET.ImGui.SameLine();
+            if (ImGuiNET.ImGui.Button("Move Right")) camera.MoveRight();
 
             ImGuiNET.ImGui.End();
             imGuiController.Render();
