@@ -1,6 +1,7 @@
 ﻿using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System;
 using System.Numerics;
@@ -15,6 +16,9 @@ namespace GrafikaSzeminarium
 
         private static GL Gl;
 
+        private static ImGuiController imGuiController;
+
+
         private static ModelObjectDescriptor[] cubes = new ModelObjectDescriptor[27];
 
         private static CameraDescriptor camera = new CameraDescriptor();
@@ -22,8 +26,23 @@ namespace GrafikaSzeminarium
         private static CubeArrangementModel cubeArrangementModel = new CubeArrangementModel();
 
         private const string ModelMatrixVariableName = "uModel";
+        private const string NormalMatrixVariableName = "uNormal";
         private const string ViewMatrixVariableName = "uView";
         private const string ProjectionMatrixVariableName = "uProjection";
+
+        private const string LightColorVariableName = "uLightColor";
+        private const string LightPositionVariableName = "uLightPos";
+        private const string ViewPositionVariableName = "uViewPos";
+
+        private const string ShinenessVariableName = "uShininess";
+        private static float shininess = 100;
+
+
+        private static Vector3 ambientStrength = new Vector3(0.8f, 0.8f, 0.8f);
+        private static Vector3 diffuseStrength = new Vector3(0.5f, 0.5f, 0.5f);
+        private static Vector3 specularStrength = new Vector3(0.5f, 0.5f, 0.5f);
+
+        private static Vector3 lightColor = new Vector3(1f, 1f, 1f);
 
         private static uint program;
 
@@ -94,6 +113,10 @@ namespace GrafikaSzeminarium
             cubes[24] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray25);
             cubes[25] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray26);
             cubes[26] = ModelObjectDescriptor.CreateCube(Gl, ModelObjectDescriptor.colorArray27);
+
+
+            imGuiController = new ImGuiController(Gl, graphicWindow, inputContext);
+
 
             Gl.ClearColor(System.Drawing.Color.White);
 
@@ -219,6 +242,8 @@ namespace GrafikaSzeminarium
             // NO OpenGL
             // make it threadsafe
             cubeArrangementModel.AdvanceTime(deltaTime);
+            imGuiController.Update((float)deltaTime);
+
         }
 
         private static unsafe void GraphicWindow_Render(double deltaTime)
@@ -229,6 +254,16 @@ namespace GrafikaSzeminarium
 
             Gl.UseProgram(program);
 
+            SetUniform3("ambientStrength", ambientStrength);
+            SetUniform3("diffuseStrength", diffuseStrength);
+            SetUniform3("specularStrength", specularStrength);
+
+            SetUniform3(LightColorVariableName, lightColor);
+            SetUniform3(LightPositionVariableName, new Vector3(0f, 1.2f, 0f));
+            SetUniform3(ViewPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
+            SetUniform1(ShinenessVariableName, shininess);
+
+
             var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
             SetMatrix(viewMatrix, ViewMatrixVariableName);
 
@@ -237,7 +272,7 @@ namespace GrafikaSzeminarium
 
 
             var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
+            SetModelMatrix(modelMatrixCenterCube);
 
             // kozep kozep kozep
             DrawModelObject(cubes[0]);
@@ -257,134 +292,192 @@ namespace GrafikaSzeminarium
 
             // bal also hatso
             Matrix4X4<float> trans1 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, -1.1f);
-            SetMatrix(trans1 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans1 * rotationMatrix);
             DrawModelObject(cubes[1]);
 
             // bal also kozep
             Matrix4X4<float> trans2 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 0f);
-            SetMatrix(trans2 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans2 * rotationMatrix);
             DrawModelObject(cubes[2]);
 
             // bal also elulso
             Matrix4X4<float> trans3 = Matrix4X4.CreateTranslation(-1.1f, -1.1f, 1.1f);
-            SetMatrix(trans3 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans3 * rotationMatrix);
             DrawModelObject(cubes[3]);
 
             // bal kozep hatso
             Matrix4X4<float> trans4 = Matrix4X4.CreateTranslation(-1.1f, 0f, -1.1f);
-            SetMatrix(trans4 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans4 * rotationMatrix);
             DrawModelObject(cubes[4]);
 
             // bal kozep kozep
             Matrix4X4<float> trans5 = Matrix4X4.CreateTranslation(-1.1f, 0f, 0f);
-            SetMatrix(trans5 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans5 * rotationMatrix);
             DrawModelObject(cubes[5]);
 
             // bal kozep elulso
             Matrix4X4<float> trans6 = Matrix4X4.CreateTranslation(-1.1f, 0f, 1.1f);
-            SetMatrix(trans6 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans6 * rotationMatrix);
             DrawModelObject(cubes[6]);
 
             // bal felso hatso
             Matrix4X4<float> trans7 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, -1.1f);
-            SetMatrix(trans7 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans7 * rotationMatrix);
             DrawModelObject(cubes[7]);
 
             // bal felso kozep
             Matrix4X4<float> trans8 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 0f);
-            SetMatrix(trans8 * rotationMatrix, ModelMatrixVariableName);
-            DrawModelObject(cubes[8]);
+            SetModelMatrix(trans8 * rotationMatrix);
             DrawModelObject(cubes[8]);
 
             // bal felso elulso
             Matrix4X4<float> trans9 = Matrix4X4.CreateTranslation(-1.1f, 1.1f, 1.1f);
-            SetMatrix(trans9 * rotationMatrix, ModelMatrixVariableName);
+            SetModelMatrix(trans9 * rotationMatrix);
             DrawModelObject(cubes[9]);
 
             // kozep also hatso
             Matrix4X4<float> trans10 = Matrix4X4.CreateTranslation(0f, -1.1f, -1.1f);
-            SetMatrix(trans10, ModelMatrixVariableName);
+            SetModelMatrix(trans10);
             DrawModelObject(cubes[10]);
 
             // kozep also kozep
             Matrix4X4<float> trans11 = Matrix4X4.CreateTranslation(0f, -1.1f, 0f);
-            SetMatrix(trans11, ModelMatrixVariableName);
+            SetModelMatrix(trans11);
             DrawModelObject(cubes[11]);
 
             // kozep also elulso
             Matrix4X4<float> trans12 = Matrix4X4.CreateTranslation(0f, -1.1f, 1.1f);
-            SetMatrix(trans12, ModelMatrixVariableName);
+            SetModelMatrix(trans12);
             DrawModelObject(cubes[12]);
 
             // kozep kozep hatso
             Matrix4X4<float> trans13 = Matrix4X4.CreateTranslation(0f, 0f, -1.1f);
-            SetMatrix(trans13, ModelMatrixVariableName);
+            SetModelMatrix(trans13);
             DrawModelObject(cubes[13]);
 
             // kozep kozep elulso
             Matrix4X4<float> trans14 = Matrix4X4.CreateTranslation(0f, 0f, 1.1f);
-            SetMatrix(trans14, ModelMatrixVariableName);
+            SetModelMatrix(trans14);
             DrawModelObject(cubes[14]);
 
             // kozep felso hatso
             Matrix4X4<float> trans15 = Matrix4X4.CreateTranslation(0f, 1.1f, -1.1f);
-            SetMatrix(trans15, ModelMatrixVariableName);
+            SetModelMatrix(trans15);
             DrawModelObject(cubes[15]);
 
             // kozep felso kozep
             Matrix4X4<float> trans16 = Matrix4X4.CreateTranslation(0f, 1.1f, 0f);
-            SetMatrix(trans16, ModelMatrixVariableName);
+            SetModelMatrix(trans16);
             DrawModelObject(cubes[16]);
 
             // kozep felso elulso
             Matrix4X4<float> trans17 = Matrix4X4.CreateTranslation(0f, 1.1f, 1.1f);
-            SetMatrix(trans17, ModelMatrixVariableName);
+            SetModelMatrix(trans17);
             DrawModelObject(cubes[17]);
 
             // jobb also hatso
             Matrix4X4<float> trans18 = Matrix4X4.CreateTranslation(1.1f, -1.1f, -1.1f);
-            SetMatrix(trans18, ModelMatrixVariableName);
+            SetModelMatrix(trans18);
             DrawModelObject(cubes[18]);
 
             // jobb also kozep
             Matrix4X4<float> trans19 = Matrix4X4.CreateTranslation(1.1f, -1.1f, 0f);
-            SetMatrix(trans19, ModelMatrixVariableName);
+            SetModelMatrix(trans19);
             DrawModelObject(cubes[19]);
 
             // jobb also elulso
             Matrix4X4<float> trans20 = Matrix4X4.CreateTranslation(1.1f, -1.1f, 1.1f);
-            SetMatrix(trans20, ModelMatrixVariableName);
+            SetModelMatrix(trans20);
             DrawModelObject(cubes[20]);
 
             // jobb kozep hatso
             Matrix4X4<float> trans21 = Matrix4X4.CreateTranslation(1.1f, 0f, -1.1f);
-            SetMatrix(trans21, ModelMatrixVariableName);
+            SetModelMatrix(trans21);
             DrawModelObject(cubes[21]);
 
             // jobb kozep kozep
             Matrix4X4<float> trans22 = Matrix4X4.CreateTranslation(1.1f, 0f, 0f);
-            SetMatrix(trans22, ModelMatrixVariableName);
+            SetModelMatrix(trans22);
             DrawModelObject(cubes[22]);
 
             // jobb kozep elulso
             Matrix4X4<float> trans23 = Matrix4X4.CreateTranslation(1.1f, 0f, 1.1f);
-            SetMatrix(trans23, ModelMatrixVariableName);
+            SetModelMatrix(trans23);
             DrawModelObject(cubes[23]);
 
             // jobb felso hatso
             Matrix4X4<float> trans24 = Matrix4X4.CreateTranslation(1.1f, 1.1f, -1.1f);
-            SetMatrix(trans24, ModelMatrixVariableName);
+            SetModelMatrix(trans24);
             DrawModelObject(cubes[24]);
 
             // jobb felso kozep
             Matrix4X4<float> trans25 = Matrix4X4.CreateTranslation(1.1f, 1.1f, 0f);
-            SetMatrix(trans25, ModelMatrixVariableName);
+            SetModelMatrix(trans25);
             DrawModelObject(cubes[25]);
 
             // jobb felso elulso
             Matrix4X4<float> trans26 = Matrix4X4.CreateTranslation(1.1f, 1.1f, 1.1f);
-            SetMatrix(trans26, ModelMatrixVariableName);
+            SetModelMatrix(trans26);
             DrawModelObject(cubes[26]);
+
+            ImGuiNET.ImGui.Begin("Lighting", ImGuiNET.ImGuiWindowFlags.AlwaysAutoResize | ImGuiNET.ImGuiWindowFlags.NoCollapse);
+
+            ImGuiNET.ImGui.Text("Light Color");
+            ImGuiNET.ImGui.SliderFloat3("Light Color", ref lightColor, 0f, 1f);
+
+            ImGuiNET.ImGui.End();
+            imGuiController.Render();
+
+        }
+
+        private static unsafe void SetModelMatrix(Matrix4X4<float> modelMatrix)
+        {
+            SetMatrix(modelMatrix, ModelMatrixVariableName);
+
+            // set also the normal matrix
+            int location = Gl.GetUniformLocation(program, NormalMatrixVariableName);
+            if (location == -1)
+            {
+                throw new System.Exception($"{NormalMatrixVariableName} uniform not found on shader.");
+            }
+
+            // G = (M^-1)^T
+            var modelMatrixWithoutTranslation = new Matrix4X4<float>(modelMatrix.Row1, modelMatrix.Row2, modelMatrix.Row3, modelMatrix.Row4);
+            modelMatrixWithoutTranslation.M41 = 0;
+            modelMatrixWithoutTranslation.M42 = 0;
+            modelMatrixWithoutTranslation.M43 = 0;
+            modelMatrixWithoutTranslation.M44 = 1;
+
+            Matrix4X4<float> modelInvers;
+            Matrix4X4.Invert<float>(modelMatrixWithoutTranslation, out modelInvers);
+            Matrix3X3<float> normalMatrix = new Matrix3X3<float>(Matrix4X4.Transpose(modelInvers));
+
+            Gl.UniformMatrix3(location, 1, false, (float*)&normalMatrix);
+            CheckError();
+        }
+
+        private static unsafe void SetUniform1(string uniformName, float uniformValue)
+        {
+            int location = Gl.GetUniformLocation(program, uniformName);
+            if (location == -1)
+            {
+                throw new System.Exception($"{uniformName} uniform not found on shader.");
+            }
+
+            Gl.Uniform1(location, uniformValue);
+            CheckError();
+        }
+
+        private static unsafe void SetUniform3(string uniformName, Vector3 uniformValue)
+        {
+            int location = Gl.GetUniformLocation(program, uniformName);
+            if (location == -1)
+            {
+                throw new System.Exception($"{uniformName} uniform not found on shader.");
+            }
+
+            Gl.Uniform3(location, uniformValue);
+            CheckError();
         }
 
         private static unsafe void DrawModelObject(ModelObjectDescriptor modelObject)
