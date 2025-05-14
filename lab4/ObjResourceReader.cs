@@ -4,47 +4,55 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Reflection;
 
 namespace Szeminarium1_24_02_17_2
 {
     internal class ObjResourceReader
     {
-        public static unsafe GlObject CreateTeapotWithColor(GL Gl, float[] faceColor)
-        {
-            uint vao = Gl.GenVertexArray();
-            Gl.BindVertexArray(vao);
-
-            List<float[]> objVertices;
-            List<int[]> objFaces;
-
-            ReadObjDataForTeapot(out objVertices, out objFaces);
-
-            List<float> glVertices = new List<float>();
-            List<float> glColors = new List<float>();
-            List<uint> glIndices = new List<uint>();
-
-            CreateGlArraysFromObjArrays(faceColor, objVertices, objFaces, glVertices, glColors, glIndices);
-
-            return CreateOpenGlObject(Gl, vao, glVertices, glColors, glIndices);
-        }
-
         public static unsafe GlObject CreateSnailWithColor(GL Gl, float[] faceColor)
         {
             uint vao = Gl.GenVertexArray();
             Gl.BindVertexArray(vao);
+            string resource = "lab4.Resources.snail.obj";
 
             List<float[]> objVertices;
             List<float[]> objNormals;
-            List<int[][]> objFaces;
-
-            ReadObjDataForSnail(out objVertices, out objNormals, out objFaces);
 
             List<float> glVertices = new List<float>();
             List<float> glColors = new List<float>();
             List<uint> glIndices = new List<uint>();
 
-            CreateGlArraysFromObjArrays2(faceColor, objVertices, objNormals, objFaces, glVertices, glColors, glIndices);
+            bool hasVN = false;
+            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource)) 
+            using (StreamReader objReader = new StreamReader(objStream))
+            {
+                while (!objReader.EndOfStream)
+                {
+                    var line = objReader.ReadLine();
+                    if (line.StartsWith("vn "))
+                    {
+                        hasVN = true;
+                        break;
+                    }
+
+                }
+            }
+
+            if (hasVN)
+            {
+                List<int[][]> objFaces;
+                ReadObjDataWithNormals(out objVertices, out objNormals, out objFaces, resource);
+                CreateGlArraysFromObjArraysWithNormals(faceColor, objVertices, objNormals, objFaces, glVertices, glColors, glIndices);
+            }
+            else
+            {
+                List<int[]> objFaces;
+                ReadObjData(out objVertices, out objFaces, resource);
+                CreateGlArraysFromObjArrays(faceColor, objVertices, objFaces, glVertices, glColors, glIndices);
+            }
 
             return CreateOpenGlObject(Gl, vao, glVertices, glColors, glIndices);
         }
@@ -124,7 +132,7 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
-        private static unsafe void CreateGlArraysFromObjArrays2(float[] faceColor, List<float[]> objVertices, List<float[]> objNormals, List<int[][]> objFaces, List<float> glVertices, List<float> glColors, List<uint> glIndices)
+        private static unsafe void CreateGlArraysFromObjArraysWithNormals(float[] faceColor, List<float[]> objVertices, List<float[]> objNormals, List<int[][]> objFaces, List<float> glVertices, List<float> glColors, List<uint> glIndices)
         {
             Dictionary<string, int> glVertexIndices = new Dictionary<string, int>();
 
@@ -155,11 +163,11 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
-        private static unsafe void ReadObjDataForTeapot(out List<float[]> objVertices, out List<int[]> objFaces)
+        private static unsafe void ReadObjData(out List<float[]> objVertices, out List<int[]> objFaces, string resource)
         {
             objVertices = new List<float[]>();
             objFaces = new List<int[]>();
-            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream("lab4.Resources.teapot.obj"))
+            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource))
             using (StreamReader objReader = new StreamReader(objStream))
             {
                 while (!objReader.EndOfStream)
@@ -191,12 +199,12 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
-        private static unsafe void ReadObjDataForSnail(out List<float[]> objVertices, out List<float[]> objNormals, out List<int[][]> objFaces)
+        private static unsafe void ReadObjDataWithNormals(out List<float[]> objVertices, out List<float[]> objNormals, out List<int[][]> objFaces, string resource)
         {
             objVertices = new List<float[]>();
             objNormals = new List<float[]>();
             objFaces = new List<int[][]>();
-            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream("lab4.Resources.snail.obj"))
+            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource))
             using (StreamReader objReader = new StreamReader(objStream))
             {
                 while (!objReader.EndOfStream)

@@ -404,7 +404,7 @@ namespace Szeminarium1_24_02_17_2
             float[] face5Color = [0.0f, 1.0f, 1.0f, 1.0f];
             float[] face6Color = [1.0f, 1.0f, 0.0f, 1.0f];
 
-            teapot = ObjResourceReader.CreateTeapotWithColor(Gl, face1Color);
+            //teapot = ObjResourceReader.CreateTeapotWithColor(Gl, face1Color);
             snail = ObjResourceReader.CreateSnailWithColor(Gl, nicestColorEver);
 
             float[] tableColor = [System.Drawing.Color.Azure.R/256f,
