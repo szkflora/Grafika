@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Numerics;
 
 namespace Szeminarium1_24_02_17_2
 {
@@ -24,6 +25,26 @@ namespace Szeminarium1_24_02_17_2
             List<uint> glIndices = new List<uint>();
 
             CreateGlArraysFromObjArrays(faceColor, objVertices, objFaces, glVertices, glColors, glIndices);
+
+            return CreateOpenGlObject(Gl, vao, glVertices, glColors, glIndices);
+        }
+
+        public static unsafe GlObject CreateSnailWithColor(GL Gl, float[] faceColor)
+        {
+            uint vao = Gl.GenVertexArray();
+            Gl.BindVertexArray(vao);
+
+            List<float[]> objVertices;
+            List<float[]> objNormals;
+            List<int[][]> objFaces;
+
+            ReadObjDataForSnail(out objVertices, out objNormals, out objFaces);
+
+            List<float> glVertices = new List<float>();
+            List<float> glColors = new List<float>();
+            List<uint> glIndices = new List<uint>();
+
+            CreateGlArraysFromObjArrays2(faceColor, objVertices, objNormals, objFaces, glVertices, glColors, glIndices);
 
             return CreateOpenGlObject(Gl, vao, glVertices, glColors, glIndices);
         }
@@ -103,6 +124,37 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
+        private static unsafe void CreateGlArraysFromObjArrays2(float[] faceColor, List<float[]> objVertices, List<float[]> objNormals, List<int[][]> objFaces, List<float> glVertices, List<float> glColors, List<uint> glIndices)
+        {
+            Dictionary<string, int> glVertexIndices = new Dictionary<string, int>();
+
+            foreach (var objFace in objFaces)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    int vIdx = objFace[i][0] - 1; // vertex index
+                    int vnIdx = objFace[i][2] - 1; // normal index
+
+                    float[] vertex = objVertices[vIdx];
+                    float[] normal = objNormals[vnIdx];
+
+                    List<float> glVertex = new List<float>();
+                    glVertex.AddRange(vertex); // x, y, z
+                    glVertex.AddRange(normal); // nx, ny, nz
+
+                    string key = string.Join(",", glVertex);
+                    if (!glVertexIndices.ContainsKey(key))
+                    {
+                        glVertices.AddRange(glVertex);
+                        glColors.AddRange(faceColor);
+                        glVertexIndices[key] = glVertexIndices.Count;
+                    }
+
+                    glIndices.Add((uint)glVertexIndices[key]);
+                }
+            }
+        }
+
         private static unsafe void ReadObjDataForTeapot(out List<float[]> objVertices, out List<int[]> objFaces)
         {
             objVertices = new List<float[]>();
@@ -132,6 +184,65 @@ namespace Szeminarium1_24_02_17_2
                             int[] face = new int[3];
                             for (int i = 0; i < face.Length; ++i)
                                 face[i] = int.Parse(lineData[i]);
+                            objFaces.Add(face);
+                            break;
+                    }
+                }
+            }
+        }
+
+        private static unsafe void ReadObjDataForSnail(out List<float[]> objVertices, out List<float[]> objNormals, out List<int[][]> objFaces)
+        {
+            objVertices = new List<float[]>();
+            objNormals = new List<float[]>();
+            objFaces = new List<int[][]>();
+            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream("lab4.Resources.snail.obj"))
+            using (StreamReader objReader = new StreamReader(objStream))
+            {
+                while (!objReader.EndOfStream)
+                {
+                    var line = objReader.ReadLine();
+
+                    if (String.IsNullOrEmpty(line) || line.Trim().StartsWith("#"))
+                        continue;
+
+                    var lineClassifier = line.Substring(0, line.IndexOf(' '));
+                    var lineData = line.Substring(lineClassifier.Length).Trim().Split(' ');
+
+                    switch (lineClassifier)
+                    {
+                        case "v":
+                            float[] vertex = new float[3];
+                            for (int i = 0; i < vertex.Length; ++i)
+                                vertex[i] = float.Parse(lineData[i], CultureInfo.InvariantCulture);
+                            objVertices.Add(vertex);
+                            break;
+                        case "vn":
+                            float[] normal = new float[3];
+                            for (int i = 0; i < normal.Length; ++i)
+                                normal[i] = float.Parse(lineData[i], CultureInfo.InvariantCulture);
+                            objNormals.Add(normal);
+                            break;
+                        case "f":
+                            int[][] face = new int[3][];
+                            for (int i = 0; i < 3; i++)
+                            {
+                                face[i] = new int[3];
+                            }
+
+                            int j = 0;
+                            foreach(var ld in lineData) // pl 1/2/3
+                            {
+                                var parts = ld.Split('/');
+
+                                for (int k = 0; k < 3; k++)
+                                {
+                                    int smth = int.Parse(parts[k]); // pl 1
+                                    face[j][k] = smth;
+                                }
+                                j++;
+                            }
+
                             objFaces.Add(face);
                             break;
                     }

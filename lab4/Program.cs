@@ -26,6 +26,7 @@ namespace Szeminarium1_24_02_17_2
         private static uint program;
 
         private static GlObject teapot;
+        private static GlObject snail;
 
         private static GlObject table;
 
@@ -245,7 +246,8 @@ namespace Szeminarium1_24_02_17_2
             SetViewerPosition();
             SetShininess();
 
-            DrawPulsingTeapot();
+            //DrawPulsingTeapot();
+            DrawPulsingSnail();
 
             DrawRevolvingCube();
 
@@ -346,6 +348,23 @@ namespace Szeminarium1_24_02_17_2
             Gl.BindVertexArray(0);
         }
 
+        private static unsafe void DrawPulsingSnail()
+        {
+            // set material uniform to rubber
+
+            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            SetModelMatrix(modelMatrixForCenterCube);
+            Gl.BindVertexArray(snail.Vao);
+            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
+            SetModelMatrix(modelMatrixForTable);
+            Gl.BindVertexArray(table.Vao);
+            Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+        }
+
         private static unsafe void SetModelMatrix(Matrix4X4<float> modelMatrix)
         {
             int location = Gl.GetUniformLocation(program, ModelMatrixVariableName);
@@ -377,7 +396,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static unsafe void SetUpObjects()
         {
-
+            float[] nicestColorEver = [227f / 255f, 115f / 255f, 131f / 255f, 1.0f];
             float[] face1Color = [1f, 0f, 0f, 1.0f];
             float[] face2Color = [0.0f, 1.0f, 0.0f, 1.0f];
             float[] face3Color = [0.0f, 0.0f, 1.0f, 1.0f];
@@ -386,6 +405,7 @@ namespace Szeminarium1_24_02_17_2
             float[] face6Color = [1.0f, 1.0f, 0.0f, 1.0f];
 
             teapot = ObjResourceReader.CreateTeapotWithColor(Gl, face1Color);
+            snail = ObjResourceReader.CreateSnailWithColor(Gl, nicestColorEver);
 
             float[] tableColor = [System.Drawing.Color.Azure.R/256f,
                                   System.Drawing.Color.Azure.G/256f,
@@ -401,6 +421,7 @@ namespace Szeminarium1_24_02_17_2
         private static void Window_Closing()
         {
             teapot.ReleaseGlObject();
+            snail.ReleaseGlObject();
             glCubeRotating.ReleaseGlObject();
         }
 
