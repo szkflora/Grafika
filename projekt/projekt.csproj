@@ -147,7 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CameraDescriptor.cs" />
-    <Compile Include="CubeArrangementModel.cs" />
+    <Compile Include="SnailArrangementModel.cs" />
     <Compile Include="GlCube.cs" />
     <Compile Include="GlObject.cs" />
     <Compile Include="ObjResourceReader.cs" />
@@ -155,10 +155,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\wing1.obj" />
+    <EmbeddedResource Include="Resources\wing2.obj" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\body.obj" />
     <EmbeddedResource Include="Resources\snail.obj" />
-    <EmbeddedResource Include="Resources\teapot.obj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Ultz.Native.GLFW.3.4.0\build\net461\Ultz.Native.GLFW.targets" Condition="Exists('packages\Ultz.Native.GLFW.3.4.0\build\net461\Ultz.Native.GLFW.targets')" />

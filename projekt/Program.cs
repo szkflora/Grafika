@@ -5,6 +5,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System;
+using System.Collections.Generic;
 
 
 namespace Szeminarium1_24_02_17_2
@@ -13,7 +14,7 @@ namespace Szeminarium1_24_02_17_2
     {
         private static CameraDescriptor cameraDescriptor = new();
 
-        private static CubeArrangementModel cubeArrangementModel = new();
+        private static SnailArrangementModel snailArrangementModel = new();
 
         private static IWindow window;
 
@@ -21,16 +22,14 @@ namespace Szeminarium1_24_02_17_2
 
         private static GL Gl;
 
-        private static ImGuiController controller;
-
         private static uint program;
 
-        private static GlObject teapot;
         private static GlObject snail;
+        private static GlObject butterfly_body;
+        private static GlObject butterfly_wing1;
+        private static GlObject butterfly_wing2;
 
         private static GlObject table;
-
-        private static GlCube glCubeRotating;
 
         private static float Shininess = 50;
 
@@ -136,8 +135,6 @@ namespace Szeminarium1_24_02_17_2
 
             Gl = window.CreateOpenGL();
 
-            controller = new ImGuiController(Gl, window, inputContext);
-
             // Handle resizes
             window.FramebufferResize += s =>
             {
@@ -211,7 +208,7 @@ namespace Szeminarium1_24_02_17_2
                     cameraDescriptor.DecreaseZXAngle();
                     break;
                 case Key.Space:
-                    cubeArrangementModel.AnimationEnabeld = !cubeArrangementModel.AnimationEnabeld;
+                    snailArrangementModel.AnimationEnabeld = !snailArrangementModel.AnimationEnabeld;
                     break;
             }
         }
@@ -222,9 +219,8 @@ namespace Szeminarium1_24_02_17_2
             // multithreaded
             // make sure it is threadsafe
             // NO GL calls
-            cubeArrangementModel.AdvanceTime(deltaTime);
+            snailArrangementModel.AdvanceTime(deltaTime);
 
-            controller.Update((float)deltaTime);
         }
 
         private static unsafe void Window_Render(double deltaTime)
@@ -247,18 +243,10 @@ namespace Szeminarium1_24_02_17_2
             SetShininess();
 
             //DrawPulsingTeapot();
+            DrawTable();
             DrawPulsingSnail();
+            DrawPulsingButterfly();
 
-            DrawRevolvingCube();
-
-            //ImGuiNET.ImGui.ShowDemoWindow();
-            ImGuiNET.ImGui.Begin("Lighting properties",
-                ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-            ImGuiNET.ImGui.SliderFloat("Shininess", ref Shininess, 1, 200);
-            ImGuiNET.ImGui.End();
-
-
-            controller.Render();
         }
 
         private static unsafe void SetLightColor()
@@ -313,35 +301,9 @@ namespace Szeminarium1_24_02_17_2
             CheckError();
         }
 
-        private static unsafe void DrawRevolvingCube()
+        private static unsafe void DrawTable()
         {
-            // set material uniform to metal
-
-            Matrix4X4<float> diamondScale = Matrix4X4.CreateScale(1f);
-            Matrix4X4<float> rotx = Matrix4X4.CreateRotationX((float)Math.PI / 4f);
-            Matrix4X4<float> rotz = Matrix4X4.CreateRotationZ((float)Math.PI / 4f);
-            Matrix4X4<float> rotLocY = Matrix4X4.CreateRotationY((float)cubeArrangementModel.DiamondCubeAngleOwnRevolution);
-            Matrix4X4<float> trans = Matrix4X4.CreateTranslation(4f, 4f, 0f);
-            Matrix4X4<float> rotGlobY = Matrix4X4.CreateRotationY((float)cubeArrangementModel.DiamondCubeAngleRevolutionOnGlobalY);
-            Matrix4X4<float> modelMatrix = diamondScale * rotx * rotz * rotLocY * trans * rotGlobY;
-
-            SetModelMatrix(modelMatrix);
-            Gl.BindVertexArray(glCubeRotating.Vao);
-            Gl.DrawElements(GLEnum.Triangles, glCubeRotating.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-        }
-
-        private static unsafe void DrawPulsingTeapot()
-        {
-            // set material uniform to rubber
-
-            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            SetModelMatrix(modelMatrixForCenterCube);
-            Gl.BindVertexArray(teapot.Vao);
-            Gl.DrawElements(GLEnum.Triangles, teapot.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-
-            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 1f, 1f);
+            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
             SetModelMatrix(modelMatrixForTable);
             Gl.BindVertexArray(table.Vao);
             Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
@@ -352,17 +314,43 @@ namespace Szeminarium1_24_02_17_2
         {
             // set material uniform to rubber
 
-            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale);
             SetModelMatrix(modelMatrixForCenterCube);
             Gl.BindVertexArray(snail.Vao);
             Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
-            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
-            SetModelMatrix(modelMatrixForTable);
-            Gl.BindVertexArray(table.Vao);
-            Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
+        }
+
+        private static unsafe void DrawPulsingButterfly()
+        {
+            var modelMatrixForCenterCube =
+            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
+
+            SetModelMatrix(modelMatrixForCenterCube);
+            Gl.BindVertexArray(butterfly_body.Vao);
+            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
+
+            var modelMatrixForCenterCube2 =
+            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
+
+            SetModelMatrix(modelMatrixForCenterCube2);
+            Gl.BindVertexArray(butterfly_wing1.Vao);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_wing1.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            var modelMatrixForCenterCube3 =
+            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
+
+            SetModelMatrix(modelMatrixForCenterCube3);
+            Gl.BindVertexArray(butterfly_wing2.Vao);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_wing2.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
         }
 
         private static unsafe void SetModelMatrix(Matrix4X4<float> modelMatrix)
@@ -405,7 +393,10 @@ namespace Szeminarium1_24_02_17_2
             float[] face6Color = [1.0f, 1.0f, 0.0f, 1.0f];
 
             //teapot = ObjResourceReader.CreateTeapotWithColor(Gl, face1Color);
-            snail = ObjResourceReader.CreateSnailWithColor(Gl, nicestColorEver);
+            snail = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail.obj");
+            butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.body.obj");
+            butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
+            butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
 
             float[] tableColor = [System.Drawing.Color.Azure.R/256f,
                                   System.Drawing.Color.Azure.G/256f,
@@ -413,16 +404,16 @@ namespace Szeminarium1_24_02_17_2
                                   1f];
             table = GlCube.CreateSquare(Gl, tableColor);
 
-            glCubeRotating = GlCube.CreateCubeWithFaceColors(Gl, face1Color, face2Color, face3Color, face4Color, face5Color, face6Color);
         }
 
         
 
         private static void Window_Closing()
         {
-            teapot.ReleaseGlObject();
             snail.ReleaseGlObject();
-            glCubeRotating.ReleaseGlObject();
+            butterfly_body.ReleaseGlObject();
+            butterfly_wing1.ReleaseGlObject();
+            butterfly_wing2.ReleaseGlObject();
         }
 
         private static unsafe void SetProjectionMatrix()

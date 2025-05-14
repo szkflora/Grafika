@@ -12,11 +12,10 @@ namespace Szeminarium1_24_02_17_2
 {
     internal class ObjResourceReader
     {
-        public static unsafe GlObject CreateSnailWithColor(GL Gl, float[] faceColor)
+        public static unsafe GlObject CreateObjWithColor(GL Gl, float[] faceColor, string resource)
         {
             uint vao = Gl.GenVertexArray();
             Gl.BindVertexArray(vao);
-            string resource = "projekt.Resources.snail.obj";
 
             List<float[]> objVertices;
             List<float[]> objNormals;
@@ -26,7 +25,7 @@ namespace Szeminarium1_24_02_17_2
             List<uint> glIndices = new List<uint>();
 
             bool hasVN = false;
-            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource)) 
+            using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource))
             using (StreamReader objReader = new StreamReader(objStream))
             {
                 while (!objReader.EndOfStream)
@@ -56,6 +55,7 @@ namespace Szeminarium1_24_02_17_2
 
             return CreateOpenGlObject(Gl, vao, glVertices, glColors, glIndices);
         }
+
 
         private static unsafe GlObject CreateOpenGlObject(GL Gl, uint vao, List<float> glVertices, List<float> glColors, List<uint> glIndices)
         {
