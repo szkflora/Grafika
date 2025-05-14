@@ -31,6 +31,8 @@ namespace Szeminarium1_24_02_17_2
 
         private static GlObject table;
 
+        private static float butTime = 0.0f;
+
         private static float Shininess = 50;
 
         private const string ModelMatrixVariableName = "uModel";
@@ -220,6 +222,7 @@ namespace Szeminarium1_24_02_17_2
             // make sure it is threadsafe
             // NO GL calls
             snailArrangementModel.AdvanceTime(deltaTime);
+            butTime += (float)deltaTime;
 
         }
 
@@ -245,7 +248,7 @@ namespace Szeminarium1_24_02_17_2
             //DrawPulsingTeapot();
             DrawTable();
             DrawPulsingSnail();
-            DrawPulsingButterfly();
+            DrawPulsingButterfly2();
 
         }
 
@@ -322,36 +325,43 @@ namespace Szeminarium1_24_02_17_2
 
         }
 
-        private static unsafe void DrawPulsingButterfly()
-        {
-            var modelMatrixForCenterCube =
-            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
 
-            SetModelMatrix(modelMatrixForCenterCube);
+        private static unsafe void DrawPulsingButterfly2()
+        {
+            float yOffset = 1.0f + (float)(0.15f * Math.Sin(butTime * 1.8f));
+
+            float wingAngle = (float)(10.0f * Math.Sin(butTime * 5.0f));
+
+            var bodyMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset, 0.0f);
+
+            SetModelMatrix(bodyMatrix);
             Gl.BindVertexArray(butterfly_body.Vao);
-            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_body.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
-            var modelMatrixForCenterCube2 =
-            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
+            var leftWingMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateRotationZ(wingAngle * (float)(Math.PI / 180f)) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f); 
 
-            SetModelMatrix(modelMatrixForCenterCube2);
+            SetModelMatrix(leftWingMatrix);
             Gl.BindVertexArray(butterfly_wing1.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_wing1.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
-            var modelMatrixForCenterCube3 =
-            Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-            Matrix4X4.CreateTranslation(0.0f, 1f, 0.0f);
-
-            SetModelMatrix(modelMatrixForCenterCube3);
+            var rightWingMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateRotationZ(-wingAngle * (float)(Math.PI / 180f)) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
+            SetModelMatrix(rightWingMatrix);
             Gl.BindVertexArray(butterfly_wing2.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_wing2.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
-
         }
+
+
 
         private static unsafe void SetModelMatrix(Matrix4X4<float> modelMatrix)
         {
