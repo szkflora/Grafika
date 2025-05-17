@@ -215,6 +215,7 @@ namespace Szeminarium1_24_02_17_2
                     snailArrangementModel.AnimationEnabeld = !snailArrangementModel.AnimationEnabeld;
                     break;
                 case Key.V:
+                    UpdateCamera();
                     cameraDescriptor.Mode = cameraDescriptor.Mode == CameraMode.FirstPerson ? CameraMode.TopDownFollow : CameraMode.FirstPerson;
                     break;
                     
@@ -490,6 +491,7 @@ namespace Szeminarium1_24_02_17_2
                     0,
                     (float)Math.Cos(snailRotationY)
                 );
+            Console.WriteLine($"Xx: {cameraDescriptor.Target.X}, Yy: {cameraDescriptor.Target.Y}, Zz: {cameraDescriptor.Target.Z}");
         }
 
         private static void Window_Closing()

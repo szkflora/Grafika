@@ -34,7 +34,7 @@ namespace Szeminarium1_24_02_17_2
                 switch (Mode)
                 {
                     case CameraMode.FirstPerson:
-                        return SnailPosition + new Vector3D<float>(0, 0, 2f);
+                        return SnailPosition + new Vector3D<float>(0, 0.5f, 0) - SnailForward * 0.006f;
                     case CameraMode.TopDownFollow:
                         return SnailPosition + new Vector3D<float>(0, 5f, 5f); 
                     case CameraMode.Orbital:
@@ -51,7 +51,7 @@ namespace Szeminarium1_24_02_17_2
                 switch (Mode)
                 {
                     case CameraMode.FirstPerson:
-                        return SnailPosition + SnailForward;
+                        return SnailPosition + new Vector3D<float>(0, 0.5f, 0) + SnailForward;
                     case CameraMode.TopDownFollow:
                         return SnailPosition;
                     case CameraMode.Orbital:
