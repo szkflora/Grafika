@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using Silk.NET.Core;
+using Silk.NET.GLFW;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -184,7 +186,7 @@ namespace Szeminarium1_24_02_17_2
                     snailRotationY += turnStep;
                     snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
                     snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
-                    //UpdateCamera();
+                    UpdateCamera();
                     break;
                     ;
                 case Key.Right:
@@ -192,13 +194,13 @@ namespace Szeminarium1_24_02_17_2
                     snailRotationY -= turnStep;
                     snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
                     snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
-                    //UpdateCamera();
+                    UpdateCamera();
                     break;
                 case Key.Up:
                     //cameraDescriptor.IncreaseDistance();
                     snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
                     snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
-                    //UpdateCamera();
+                    UpdateCamera();
                     break;
                 case Key.Down:
                     cameraDescriptor.DecreaseDistance();
@@ -212,6 +214,10 @@ namespace Szeminarium1_24_02_17_2
                 case Key.Space:
                     snailArrangementModel.AnimationEnabeld = !snailArrangementModel.AnimationEnabeld;
                     break;
+                case Key.V:
+                    cameraDescriptor.Mode = cameraDescriptor.Mode == CameraMode.FirstPerson ? CameraMode.TopDownFollow : CameraMode.FirstPerson;
+                    break;
+                    
             }
         }
 
@@ -475,17 +481,16 @@ namespace Szeminarium1_24_02_17_2
             //UpdateCamera();
 
         }
-
-        //private static void UpdateCamera()
-        //{
-        //    float rad = (float)(snailRotationY * (Math.PI / 180f));
-
-        //    cameraDescriptor.Position = new Vector3D<float>(
-        //        (float)(snailPosition.X - Math.Sin(rad) * 3f),
-        //        snailPosition.Y + 2f,
-        //        (float)(snailPosition.Z - Math.Cos(rad) * 3f));
-        //    cameraDescriptor.Target = snailPosition;
-        //}
+        private static void UpdateCamera()
+        {
+            cameraDescriptor.SnailPosition = snailPosition;
+            Console.WriteLine($"X: {cameraDescriptor.SnailPosition.X}, Y: {cameraDescriptor.SnailPosition.Y}, Z: {cameraDescriptor.SnailPosition.Z}");
+            cameraDescriptor.SnailForward = new Vector3D<float>(
+                    (float)Math.Sin(snailRotationY),
+                    0,
+                    (float)Math.Cos(snailRotationY)
+                );
+        }
 
         private static void Window_Closing()
         {
@@ -525,8 +530,8 @@ namespace Szeminarium1_24_02_17_2
 
         public static void CheckError()
         {
-            var error = (ErrorCode)Gl.GetError();
-            if (error != ErrorCode.NoError)
+            var error = (Silk.NET.OpenGL.ErrorCode)Gl.GetError();
+            if (error != Silk.NET.OpenGL.ErrorCode.NoError)
                 throw new Exception("GL.GetError() returned " + error.ToString());
         }
     }

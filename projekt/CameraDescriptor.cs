@@ -3,8 +3,16 @@ using System;
 
 namespace Szeminarium1_24_02_17_2
 {
+    public enum CameraMode
+    {
+        Orbital,       // original
+        FirstPerson,   // snail view
+        TopDownFollow  // above the snail
+    }
     internal class CameraDescriptor
     {
+        public CameraMode Mode = CameraMode.Orbital;
+
         private double DistanceToOrigin = 4;
 
         private double AngleToZYPlane = 0;
@@ -15,60 +23,60 @@ namespace Szeminarium1_24_02_17_2
 
         private const double AngleChangeStepSize = System.Math.PI / 180 * 5;
 
-        private Vector3D<float> manualPosition;
-        private bool useManualPosition = false;
-        private Vector3D<float> manualTarget;
-        private bool useManualTarget = false;
+        public Vector3D<float> SnailPosition;
 
-        /// <summary>
-        /// Gets the position of the camera.
-        /// </summary>
+        public Vector3D<float> SnailForward = new Vector3D<float>(0, 0, 5);
+
         public Vector3D<float> Position
         {
             get
             {
-                //if (useManualPosition)
-                //    return manualPosition;
-                //else
-                    return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
-            }
-            //set
-            //{
-            //    manualPosition = value;
-            //    useManualPosition = true;
-            //}
-        }
-
-        /// <summary>
-        /// Gets the up vector of the camera.
-        /// </summary>
-        public Vector3D<float> UpVector
-        {
-            get
-            {
-                    return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane + System.Math.PI / 2));
+                switch (Mode)
+                {
+                    case CameraMode.FirstPerson:
+                        return SnailPosition + new Vector3D<float>(0, 0, 2f);
+                    case CameraMode.TopDownFollow:
+                        return SnailPosition + new Vector3D<float>(0, 5f, 5f); 
+                    case CameraMode.Orbital:
+                    default:
+                        return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
+                }
             }
         }
 
-        /// <summary>
-        /// Gets the target point of the camera view.
-        /// </summary>
         public Vector3D<float> Target
         {
             get
             {
-                // For the moment the camera is always pointed at the origin.
-                if (useManualTarget)
-                    return manualTarget;
-                else
-                    return Vector3D<float>.Zero;
-            }
-            set
-            {
-                manualTarget = value;
-                useManualTarget = true;
+                switch (Mode)
+                {
+                    case CameraMode.FirstPerson:
+                        return SnailPosition + SnailForward;
+                    case CameraMode.TopDownFollow:
+                        return SnailPosition;
+                    case CameraMode.Orbital:
+                    default:
+                            return Vector3D<float>.Zero;
+                }
             }
         }
+
+        public Vector3D<float> UpVector
+        {
+            get
+            {
+                switch (Mode)
+                {
+                    case CameraMode.FirstPerson:
+                    case CameraMode.TopDownFollow:
+                        return Vector3D<float>.UnitY;
+                    case CameraMode.Orbital:
+                    default:
+                        return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane + System.Math.PI / 2));
+                }
+            }
+        }
+
 
         public void IncreaseZXAngle()
         {
