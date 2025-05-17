@@ -1,4 +1,5 @@
 ﻿using Silk.NET.Maths;
+using System;
 
 namespace Szeminarium1_24_02_17_2
 {
@@ -14,6 +15,11 @@ namespace Szeminarium1_24_02_17_2
 
         private const double AngleChangeStepSize = System.Math.PI / 180 * 5;
 
+        private Vector3D<float> manualPosition;
+        private bool useManualPosition = false;
+        private Vector3D<float> manualTarget;
+        private bool useManualTarget = false;
+
         /// <summary>
         /// Gets the position of the camera.
         /// </summary>
@@ -21,8 +27,16 @@ namespace Szeminarium1_24_02_17_2
         {
             get
             {
-                return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
+                //if (useManualPosition)
+                //    return manualPosition;
+                //else
+                    return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
             }
+            //set
+            //{
+            //    manualPosition = value;
+            //    useManualPosition = true;
+            //}
         }
 
         /// <summary>
@@ -32,7 +46,7 @@ namespace Szeminarium1_24_02_17_2
         {
             get
             {
-                return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane + System.Math.PI / 2));
+                    return Vector3D.Normalize(GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane + System.Math.PI / 2));
             }
         }
 
@@ -44,7 +58,15 @@ namespace Szeminarium1_24_02_17_2
             get
             {
                 // For the moment the camera is always pointed at the origin.
-                return Vector3D<float>.Zero;
+                if (useManualTarget)
+                    return manualTarget;
+                else
+                    return Vector3D<float>.Zero;
+            }
+            set
+            {
+                manualTarget = value;
+                useManualTarget = true;
             }
         }
 

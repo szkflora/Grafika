@@ -5,8 +5,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System;
-using System.Collections.Generic;
-
+using System.IO;
 
 namespace Szeminarium1_24_02_17_2
 {
@@ -22,8 +21,18 @@ namespace Szeminarium1_24_02_17_2
 
         private static GL Gl;
 
+        private static float butTime = 0.0f;
+        private static float snailRotationY = 0.0f;
+        private static float moveStep = 0.05f;
+        private static float turnStep = 5f * (float)(Math.PI / 180f);
+
+        private static Vector3D<float> snailPosition = new(0, 0, 0);
+
+        //private static ImGuiController controller;
+
         private static uint program;
 
+        private static GlObject teapot;
         private static GlObject snail;
         private static GlObject butterfly_body;
         private static GlObject butterfly_wing1;
@@ -31,7 +40,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static GlObject table;
 
-        private static float butTime = 0.0f;
+        private static GlCube skyBox;
 
         private static float Shininess = 50;
 
@@ -40,76 +49,18 @@ namespace Szeminarium1_24_02_17_2
         private const string ViewMatrixVariableName = "uView";
         private const string ProjectionMatrixVariableName = "uProjection";
 
-        private static readonly string VertexShaderSource = @"
-        #version 330 core
-        layout (location = 0) in vec3 vPos;
-		layout (location = 1) in vec4 vCol;
-        layout (location = 2) in vec3 vNorm;
-
-        uniform mat4 uModel;
-        uniform mat3 uNormal;
-        uniform mat4 uView;
-        uniform mat4 uProjection;
-
-		out vec4 outCol;
-        out vec3 outNormal;
-        out vec3 outWorldPosition;
-        
-        void main()
-        {
-			outCol = vCol;
-            gl_Position = uProjection*uView*uModel*vec4(vPos.x, vPos.y, vPos.z, 1.0);
-            outNormal = uNormal*vNorm;
-            outWorldPosition = vec3(uModel*vec4(vPos.x, vPos.y, vPos.z, 1.0));
-        }
-        ";
+        private const string TextureUniformVariableName = "uTexture";
 
         private const string LightColorVariableName = "lightColor";
         private const string LightPositionVariableName = "lightPos";
         private const string ViewPosVariableName = "viewPos";
         private const string ShininessVariableName = "shininess";
 
-        private static readonly string FragmentShaderSource = @"
-        #version 330 core
-        
-        uniform vec3 lightColor;
-        uniform vec3 lightPos;
-        uniform vec3 viewPos;
-        uniform float shininess;
-
-        out vec4 FragColor;
-
-		in vec4 outCol;
-        in vec3 outNormal;
-        in vec3 outWorldPosition;
-
-        void main()
-        {
-            float ambientStrength = 0.2;
-            vec3 ambient = ambientStrength * lightColor;
-
-            float diffuseStrength = 0.3;
-            vec3 norm = normalize(outNormal);
-            vec3 lightDir = normalize(lightPos - outWorldPosition);
-            float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColor * diffuseStrength;
-
-            float specularStrength = 0.5;
-            vec3 viewDir = normalize(viewPos - outWorldPosition);
-            vec3 reflectDir = reflect(-lightDir, norm);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess) / max(dot(norm,viewDir), -dot(norm,lightDir));
-            vec3 specular = specularStrength * spec * lightColor;  
-
-            vec3 result = (ambient + diffuse + specular) * outCol.xyz;
-            FragColor = vec4(result, outCol.w);
-        }
-        ";
-
         static void Main(string[] args)
         {
             WindowOptions windowOptions = WindowOptions.Default;
             windowOptions.Title = "2 szeminárium";
-            windowOptions.Size = new Vector2D<int>(500, 500);
+            windowOptions.Size = new Vector2D<int>(1000, 1000);
 
             // on some systems there is no depth buffer by default, so we need to make sure one is created
             windowOptions.PreferredDepthBufferBits = 24;
@@ -137,6 +88,8 @@ namespace Szeminarium1_24_02_17_2
 
             Gl = window.CreateOpenGL();
 
+            //controller = new ImGuiController(Gl, window, inputContext);
+
             // Handle resizes
             window.FramebufferResize += s =>
             {
@@ -162,13 +115,13 @@ namespace Szeminarium1_24_02_17_2
             uint vshader = Gl.CreateShader(ShaderType.VertexShader);
             uint fshader = Gl.CreateShader(ShaderType.FragmentShader);
 
-            Gl.ShaderSource(vshader, VertexShaderSource);
+            Gl.ShaderSource(vshader, ReadShader("VertexShader.vert"));
             Gl.CompileShader(vshader);
             Gl.GetShader(vshader, ShaderParameterName.CompileStatus, out int vStatus);
             if (vStatus != (int)GLEnum.True)
                 throw new Exception("Vertex shader failed to compile: " + Gl.GetShaderInfoLog(vshader));
 
-            Gl.ShaderSource(fshader, FragmentShaderSource);
+            Gl.ShaderSource(fshader, ReadShader("FragmentShader.frag"));
             Gl.CompileShader(fshader);
 
             program = Gl.CreateProgram();
@@ -186,21 +139,68 @@ namespace Szeminarium1_24_02_17_2
             Gl.DeleteShader(fshader);
         }
 
+        private static string ReadShader(string shaderFileName)
+        {
+            using (Stream shaderStream = typeof(Program).Assembly.GetManifestResourceStream("projekt.Shaders." + shaderFileName))
+            using (StreamReader shaderReader = new StreamReader(shaderStream))
+                return shaderReader.ReadToEnd();
+        }
+
+        //private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
+        //{
+        //    switch (key)
+        //    {
+        //        case Key.Left:
+        //            cameraDescriptor.DecreaseZYAngle();
+        //            break;
+        //            ;
+        //        case Key.Right:
+        //            cameraDescriptor.IncreaseZYAngle();
+        //            break;
+        //        case Key.Down:
+        //            cameraDescriptor.IncreaseDistance();
+        //            break;
+        //        case Key.Up:
+        //            cameraDescriptor.DecreaseDistance();
+        //            break;
+        //        case Key.U:
+        //            cameraDescriptor.IncreaseZXAngle();
+        //            break;
+        //        case Key.D:
+        //            cameraDescriptor.DecreaseZXAngle();
+        //            break;
+        //        case Key.Space:
+        //            cubeArrangementModel.AnimationEnabeld = !cubeArrangementModel.AnimationEnabeld;
+        //            break;
+        //    }
+        // }
+
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
             switch (key)
             {
                 case Key.Left:
-                    cameraDescriptor.DecreaseZYAngle();
+                    //cameraDescriptor.DecreaseZYAngle();
+                    snailRotationY += turnStep;
+                    snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
+                    snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
+                    //UpdateCamera();
                     break;
                     ;
                 case Key.Right:
-                    cameraDescriptor.IncreaseZYAngle();
-                    break;
-                case Key.Down:
-                    cameraDescriptor.IncreaseDistance();
+                    // cameraDescriptor.IncreaseZYAngle();
+                    snailRotationY -= turnStep;
+                    snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
+                    snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
+                    //UpdateCamera();
                     break;
                 case Key.Up:
+                    //cameraDescriptor.IncreaseDistance();
+                    snailPosition.X += (float)Math.Sin(snailRotationY) * moveStep;
+                    snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
+                    //UpdateCamera();
+                    break;
+                case Key.Down:
                     cameraDescriptor.DecreaseDistance();
                     break;
                 case Key.U:
@@ -224,6 +224,7 @@ namespace Szeminarium1_24_02_17_2
             snailArrangementModel.AdvanceTime(deltaTime);
             butTime += (float)deltaTime;
 
+            //controller.Update((float)deltaTime);
         }
 
         private static unsafe void Window_Render(double deltaTime)
@@ -246,10 +247,126 @@ namespace Szeminarium1_24_02_17_2
             SetShininess();
 
             //DrawPulsingTeapot();
-            DrawTable();
+
+            DrawSkyBox();
+            //DrawTable();
             DrawPulsingSnail();
             DrawPulsingButterfly2();
 
+            //ImGuiNET.ImGui.ShowDemoWindow();
+            //ImGuiNET.ImGui.Begin("Lighting properties",
+            //    ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
+            //ImGuiNET.ImGui.SliderFloat("Shininess", ref Shininess, 1, 200);
+            //ImGuiNET.ImGui.End();
+
+
+            //controller.Render();
+        }
+
+        private static unsafe void DrawSkyBox()
+        {
+            Matrix4X4<float> modelMatrix = Matrix4X4.CreateScale(400f);
+            SetModelMatrix(modelMatrix);
+            Gl.BindVertexArray(skyBox.Vao);
+
+            int textureLocation = Gl.GetUniformLocation(program, TextureUniformVariableName);
+            if (textureLocation == -1)
+            {
+                throw new Exception($"{TextureUniformVariableName} uniform not found on shader.");
+            }
+            // set texture 0
+            Gl.Uniform1(textureLocation, 0);
+
+            Gl.ActiveTexture(TextureUnit.Texture0);
+            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)GLEnum.Linear);
+            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)GLEnum.Linear);
+            Gl.BindTexture(TextureTarget.Texture2D, skyBox.Texture.Value);
+
+            Gl.DrawElements(GLEnum.Triangles, skyBox.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            CheckError();
+            Gl.BindTexture(TextureTarget.Texture2D, 0);
+            CheckError();
+        }
+
+
+        private static unsafe void DrawTable()
+        {
+            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
+            SetModelMatrix(modelMatrixForTable);
+            Gl.BindVertexArray(table.Vao);
+            Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+        }
+
+        private static unsafe void DrawPulsingSnail()
+        {
+            // set material uniform to rubber
+
+            var modelMatrixForCenterCube =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateRotationY(snailRotationY) *
+                Matrix4X4.CreateTranslation(snailPosition);
+
+
+            SetModelMatrix(modelMatrixForCenterCube);
+            Gl.BindVertexArray(snail.Vao);
+            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+        }
+
+        private static unsafe void DrawPulsingTeapot()
+        {
+            // set material uniform to rubber
+
+            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale);
+            SetModelMatrix(modelMatrixForCenterCube);
+            Gl.BindVertexArray(teapot.Vao);
+            Gl.DrawElements(GLEnum.Triangles, teapot.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            //var modelMatrixForTable = Matrix4X4.CreateScale(1f, 1f, 1f);
+            //SetModelMatrix(modelMatrixForTable);
+            //Gl.BindVertexArray(table.Vao);
+            //Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
+            //Gl.BindVertexArray(0);
+        }
+
+        private static unsafe void DrawPulsingButterfly2()
+        {
+            float yOffset = 1.0f + (float)(0.15f * Math.Sin(butTime * 1.8f));
+
+            float wingAngle = (float)(10.0f * Math.Sin(butTime * 5.0f));
+
+            var bodyMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset, 0.0f);
+
+            SetModelMatrix(bodyMatrix);
+            Gl.BindVertexArray(butterfly_body.Vao);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_body.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            var leftWingMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateRotationZ(wingAngle * (float)(Math.PI / 180f)) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
+
+            SetModelMatrix(leftWingMatrix);
+            Gl.BindVertexArray(butterfly_wing1.Vao);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_wing1.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            var rightWingMatrix =
+                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+                Matrix4X4.CreateRotationZ(-wingAngle * (float)(Math.PI / 180f)) *
+                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
+            SetModelMatrix(rightWingMatrix);
+            Gl.BindVertexArray(butterfly_wing2.Vao);
+            Gl.DrawElements(GLEnum.Triangles, butterfly_wing2.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
         }
 
         private static unsafe void SetLightColor()
@@ -304,65 +421,6 @@ namespace Szeminarium1_24_02_17_2
             CheckError();
         }
 
-        private static unsafe void DrawTable()
-        {
-            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
-            SetModelMatrix(modelMatrixForTable);
-            Gl.BindVertexArray(table.Vao);
-            Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-        }
-
-        private static unsafe void DrawPulsingSnail()
-        {
-            // set material uniform to rubber
-
-            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale);
-            SetModelMatrix(modelMatrixForCenterCube);
-            Gl.BindVertexArray(snail.Vao);
-            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-
-        }
-
-
-        private static unsafe void DrawPulsingButterfly2()
-        {
-            float yOffset = 1.0f + (float)(0.15f * Math.Sin(butTime * 1.8f));
-
-            float wingAngle = (float)(10.0f * Math.Sin(butTime * 5.0f));
-
-            var bodyMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset, 0.0f);
-
-            SetModelMatrix(bodyMatrix);
-            Gl.BindVertexArray(butterfly_body.Vao);
-            Gl.DrawElements(GLEnum.Triangles, butterfly_body.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-
-            var leftWingMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateRotationZ(wingAngle * (float)(Math.PI / 180f)) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f); 
-
-            SetModelMatrix(leftWingMatrix);
-            Gl.BindVertexArray(butterfly_wing1.Vao);
-            Gl.DrawElements(GLEnum.Triangles, butterfly_wing1.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-
-            var rightWingMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateRotationZ(-wingAngle * (float)(Math.PI / 180f)) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
-            SetModelMatrix(rightWingMatrix);
-            Gl.BindVertexArray(butterfly_wing2.Vao);
-            Gl.DrawElements(GLEnum.Triangles, butterfly_wing2.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-        }
-
-
-
         private static unsafe void SetModelMatrix(Matrix4X4<float> modelMatrix)
         {
             int location = Gl.GetUniformLocation(program, ModelMatrixVariableName);
@@ -402,21 +460,32 @@ namespace Szeminarium1_24_02_17_2
             float[] face5Color = [0.0f, 1.0f, 1.0f, 1.0f];
             float[] face6Color = [1.0f, 1.0f, 0.0f, 1.0f];
 
-            //teapot = ObjResourceReader.CreateTeapotWithColor(Gl, face1Color);
-            snail = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail.obj");
-            butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.body.obj");
-            butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
-            butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
+            //teapot = ObjResourceReader.CreateObjWithColor(Gl, face1Color, "skybox.Resources.teapot.obj");
 
             float[] tableColor = [System.Drawing.Color.Azure.R/256f,
                                   System.Drawing.Color.Azure.G/256f,
                                   System.Drawing.Color.Azure.B/256f,
                                   1f];
             table = GlCube.CreateSquare(Gl, tableColor);
+            snail = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail.obj");
+            butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.body.obj");
+            butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
+            butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
+            skyBox = GlCube.CreateInteriorCube(Gl, "");
+            //UpdateCamera();
 
         }
 
-        
+        //private static void UpdateCamera()
+        //{
+        //    float rad = (float)(snailRotationY * (Math.PI / 180f));
+
+        //    cameraDescriptor.Position = new Vector3D<float>(
+        //        (float)(snailPosition.X - Math.Sin(rad) * 3f),
+        //        snailPosition.Y + 2f,
+        //        (float)(snailPosition.Z - Math.Cos(rad) * 3f));
+        //    cameraDescriptor.Target = snailPosition;
+        //}
 
         private static void Window_Closing()
         {
@@ -428,7 +497,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static unsafe void SetProjectionMatrix()
         {
-            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)Math.PI / 4f, 1024f / 768f, 0.1f, 100);
+            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)Math.PI / 4f, 1024f / 768f, 0.1f, 1000);
             int location = Gl.GetUniformLocation(program, ProjectionMatrixVariableName);
 
             if (location == -1)
