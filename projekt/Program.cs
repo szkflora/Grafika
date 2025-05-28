@@ -8,6 +8,7 @@ using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System;
 using System.IO;
+using System.Numerics;
 
 namespace Szeminarium1_24_02_17_2
 {
@@ -16,6 +17,8 @@ namespace Szeminarium1_24_02_17_2
         private static CameraDescriptor cameraDescriptor = new();
 
         private static SnailArrangementModel snailArrangementModel = new();
+
+        private static ButterflyArrangementModel butterflyArrangementModel = new();
 
         private static IWindow window;
 
@@ -34,13 +37,11 @@ namespace Szeminarium1_24_02_17_2
 
         private static uint program;
 
-        private static GlObject teapot;
+        private static GlObject field;
         private static GlObject snail;
         private static GlObject butterfly_body;
         private static GlObject butterfly_wing1;
         private static GlObject butterfly_wing2;
-
-        private static GlObject table;
 
         private static GlCube skyBox;
 
@@ -229,6 +230,7 @@ namespace Szeminarium1_24_02_17_2
             // make sure it is threadsafe
             // NO GL calls
             snailArrangementModel.AdvanceTime(deltaTime);
+            butterflyArrangementModel.AdvanceTime(deltaTime);
             butTime += (float)deltaTime;
 
             //controller.Update((float)deltaTime);
@@ -256,9 +258,9 @@ namespace Szeminarium1_24_02_17_2
             //DrawPulsingTeapot();
 
             DrawSkyBox();
-            //DrawTable();
+            DrawField();
             DrawPulsingSnail();
-            DrawPulsingButterfly2();
+            DrawPulsingButterfly();
 
             //ImGuiNET.ImGui.ShowDemoWindow();
             //ImGuiNET.ImGui.Begin("Lighting properties",
@@ -298,12 +300,12 @@ namespace Szeminarium1_24_02_17_2
         }
 
 
-        private static unsafe void DrawTable()
+        private static unsafe void DrawField()
         {
-            var modelMatrixForTable = Matrix4X4.CreateScale(1f, 0.1f, 1f) * Matrix4X4.CreateTranslation(0f, -1f, 0f);
-            SetModelMatrix(modelMatrixForTable);
-            Gl.BindVertexArray(table.Vao);
-            Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
+            var modelMatrixForField = Matrix4X4.CreateScale(1f, 1f, 1f) * Matrix4X4.CreateTranslation(0f, -0.46f, 0f);
+            SetModelMatrix(modelMatrixForField);
+            Gl.BindVertexArray(field.Vao);
+            Gl.DrawElements(GLEnum.Triangles, field.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
         }
 
@@ -324,52 +326,36 @@ namespace Szeminarium1_24_02_17_2
 
         }
 
-        private static unsafe void DrawPulsingTeapot()
-        {
-            // set material uniform to rubber
 
-            var modelMatrixForCenterCube = Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale);
-            SetModelMatrix(modelMatrixForCenterCube);
-            Gl.BindVertexArray(teapot.Vao);
-            Gl.DrawElements(GLEnum.Triangles, teapot.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
-
-            //var modelMatrixForTable = Matrix4X4.CreateScale(1f, 1f, 1f);
-            //SetModelMatrix(modelMatrixForTable);
-            //Gl.BindVertexArray(table.Vao);
-            //Gl.DrawElements(GLEnum.Triangles, table.IndexArrayLength, GLEnum.UnsignedInt, null);
-            //Gl.BindVertexArray(0);
-        }
-
-        private static unsafe void DrawPulsingButterfly2()
+        private static unsafe void DrawPulsingButterfly()
         {
             float yOffset = 1.0f + (float)(0.15f * Math.Sin(butTime * 1.8f));
 
-            float wingAngle = (float)(10.0f * Math.Sin(butTime * 5.0f));
-
-            var bodyMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset, 0.0f);
+            Matrix4X4<float> scale = Matrix4X4.CreateScale(0.6f);
+            Matrix4X4<float> trans = Matrix4X4.CreateTranslation(3f, 1.5f, 0f);
+            Matrix4X4<float> rotGlobY = Matrix4X4.CreateRotationY((float)butterflyArrangementModel.AngleRevolutionOnGlobalY);
+            Matrix4X4<float> pulsing = Matrix4X4.CreateTranslation(0, yOffset, 0);
+            Matrix4X4<float> bodyMatrix = scale * trans * pulsing * rotGlobY;
 
             SetModelMatrix(bodyMatrix);
             Gl.BindVertexArray(butterfly_body.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_body.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
-            var leftWingMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateRotationZ(wingAngle * (float)(Math.PI / 180f)) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
+            float wingAngle = (float)(10.0f * Math.Sin(butTime * 5.0f));
+            Matrix4X4<float> leftWingMotion = Matrix4X4.CreateRotationZ(wingAngle * (float)(Math.PI / 180f));
+
+            var leftWingMatrix = scale * leftWingMotion * trans * pulsing * rotGlobY;
 
             SetModelMatrix(leftWingMatrix);
             Gl.BindVertexArray(butterfly_wing1.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_wing1.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
-            var rightWingMatrix =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
-                Matrix4X4.CreateRotationZ(-wingAngle * (float)(Math.PI / 180f)) *
-                Matrix4X4.CreateTranslation(0.0f, yOffset + 0.01f, 0.0f);
+            Matrix4X4<float> rightWingMotion = Matrix4X4.CreateRotationZ(-wingAngle * (float)(Math.PI / 180f));
+
+            var rightWingMatrix = scale * rightWingMotion * trans * pulsing * rotGlobY;
+
             SetModelMatrix(rightWingMatrix);
             Gl.BindVertexArray(butterfly_wing2.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_wing2.IndexArrayLength, GLEnum.UnsignedInt, null);
@@ -460,22 +446,17 @@ namespace Szeminarium1_24_02_17_2
         private static unsafe void SetUpObjects()
         {
             float[] nicestColorEver = [227f / 255f, 115f / 255f, 131f / 255f, 1.0f];
-            float[] face1Color = [1f, 0f, 0f, 1.0f];
-            float[] face2Color = [0.0f, 1.0f, 0.0f, 1.0f];
-            float[] face3Color = [0.0f, 0.0f, 1.0f, 1.0f];
-            float[] face4Color = [1.0f, 0.0f, 1.0f, 1.0f];
-            float[] face5Color = [0.0f, 1.0f, 1.0f, 1.0f];
-            float[] face6Color = [1.0f, 1.0f, 0.0f, 1.0f];
+            float[] black = [0f, 0f, 0f, 1.0f];
 
             //teapot = ObjResourceReader.CreateObjWithColor(Gl, face1Color, "skybox.Resources.teapot.obj");
 
-            float[] tableColor = [System.Drawing.Color.Azure.R/256f,
-                                  System.Drawing.Color.Azure.G/256f,
-                                  System.Drawing.Color.Azure.B/256f,
+            float[] fieldColor = [88/256f,
+                                  199/256f,
+                                  54/256f,
                                   1f];
-            table = GlCube.CreateSquare(Gl, tableColor);
+            field = GlCube.CreateSquare(Gl, fieldColor);
             snail = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail.obj");
-            butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.body.obj");
+            butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, black, "projekt.Resources.body.obj");
             butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
             butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
             skyBox = GlCube.CreateInteriorCube(Gl, "");
@@ -496,6 +477,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static void Window_Closing()
         {
+            field.ReleaseGlObject();
             snail.ReleaseGlObject();
             butterfly_body.ReleaseGlObject();
             butterfly_wing1.ReleaseGlObject();

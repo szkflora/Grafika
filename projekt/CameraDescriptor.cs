@@ -13,7 +13,7 @@ namespace Szeminarium1_24_02_17_2
     {
         public CameraMode Mode = CameraMode.Orbital;
 
-        private double DistanceToOrigin = 4;
+        private double DistanceToOrigin = 6;
 
         private double AngleToZYPlane = 0;
 
@@ -36,7 +36,7 @@ namespace Szeminarium1_24_02_17_2
                     case CameraMode.FirstPerson:
                         return SnailPosition + new Vector3D<float>(0, 0.5f, 0) - SnailForward * 0.006f;
                     case CameraMode.TopDownFollow:
-                        return SnailPosition + new Vector3D<float>(0, 5f, 5f); 
+                        return SnailPosition + new Vector3D<float>(0, 7f, 5f); 
                     case CameraMode.Orbital:
                     default:
                         return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
