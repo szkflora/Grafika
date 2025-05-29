@@ -5,6 +5,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
+using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
 using System;
 using System.IO;
@@ -31,6 +32,8 @@ namespace Szeminarium1_24_02_17_2
         private static float snailRotationY = 0.0f;
         private static float moveStep = 1f;
         private static float turnStep = 5f * (float)(Math.PI / 180f);
+        private static Random rnd = new Random();
+        private static int[][] flowers = new int[50][];
 
         private static Vector3D<float> snailPosition = new(0, 0, 0);
 
@@ -322,13 +325,15 @@ namespace Szeminarium1_24_02_17_2
                 Matrix4X4.CreateScale(0.15f) *
                 Matrix4X4.CreateTranslation(snailPosition);
 
-            //uint textureId = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.snail_texture.jpeg");
-            //Gl.BindTexture(TextureTarget.Texture2D, textureId);
+            uint textureId = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.body_texture.jpg");
+            Gl.BindTexture(TextureTarget.Texture2D, textureId);
             SetModelMatrix(modelMatrixForSnail);
             Gl.BindVertexArray(snail_body.Vao);
             Gl.DrawElements(GLEnum.Triangles, snail_body.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
+            uint textureId2 = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.shell_texture.jpg");
+            Gl.BindTexture(TextureTarget.Texture2D, textureId2);
             SetModelMatrix(modelMatrixForSnail);
             Gl.BindVertexArray(snail_shell.Vao);
             Gl.DrawElements(GLEnum.Triangles, snail_shell.IndexArrayLength, GLEnum.UnsignedInt, null);
@@ -336,28 +341,53 @@ namespace Szeminarium1_24_02_17_2
 
         }
 
+        private static unsafe void GenerateFlowerTypes()
+        {
+
+            for (int i = 0; i < 50; i ++)
+            {
+                flowers[i] = new int[3];
+                flowers[i][0] = rnd.Next(2);
+                flowers[i][1] = rnd.Next(-50, 51);
+                flowers[i][2] = rnd.Next(-50, 51);
+            }
+
+        }
+
         private static unsafe void DrawFlowers()
         {
-            var modelMatrixForFlower =
-               Matrix4X4.CreateTranslation(-4.0f, 0, -4.0f) *
-               Matrix4X4.CreateScale(0.07f);
+            var originalModelMatrixForFlower =
+               Matrix4X4.CreateTranslation(0f, -9.0f, 0f) *
+               Matrix4X4.CreateScale(0.05f);
 
+            uint textureId3 = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.flower_texture.jpg");
 
-            SetModelMatrix(modelMatrixForFlower);
-            Gl.BindVertexArray(flower1.Vao);
-            Gl.DrawElements(GLEnum.Triangles, flower1.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
+            var originalModelMatrixForFlower2 =
+               Matrix4X4.CreateScale(0.05f);
 
-            var modelMatrixForFlower2 =
-               Matrix4X4.CreateScale(1f) *
-               Matrix4X4.CreateTranslation(-6.0f, 0, -6.0f);
-
-
-
-            SetModelMatrix(modelMatrixForFlower2);
-            Gl.BindVertexArray(flower2.Vao);
-            Gl.DrawElements(GLEnum.Triangles, flower2.IndexArrayLength, GLEnum.UnsignedInt, null);
-            Gl.BindVertexArray(0);
+            uint textureId4 = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.yellow_texture.png");
+            
+            for (int i = 0; i < 50; i ++)
+            {
+                if (flowers[i][0] == 0)
+                {
+                    var modelMatrixForFlower = originalModelMatrixForFlower * Matrix4X4.CreateTranslation(flowers[i][1], 0f, flowers[i][2]);
+                    Gl.BindTexture(TextureTarget.Texture2D, textureId3);
+                    SetModelMatrix(modelMatrixForFlower);
+                    Gl.BindVertexArray(flower1.Vao);
+                    Gl.DrawElements(GLEnum.Triangles, flower1.IndexArrayLength, GLEnum.UnsignedInt, null);
+                    Gl.BindVertexArray(0);
+                }
+                else
+                {
+                    var modelMatrixForFlower2 = originalModelMatrixForFlower2 * Matrix4X4.CreateTranslation(flowers[i][1], 0f, flowers[i][2]);
+                    Gl.BindTexture(TextureTarget.Texture2D, textureId4);
+                    SetModelMatrix(modelMatrixForFlower2);
+                    Gl.BindVertexArray(flower2.Vao);
+                    Gl.DrawElements(GLEnum.Triangles, flower2.IndexArrayLength, GLEnum.UnsignedInt, null);
+                    Gl.BindVertexArray(0);
+                }
+            }
         }
 
 
@@ -495,9 +525,10 @@ namespace Szeminarium1_24_02_17_2
             butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, black, "projekt.Resources.body.obj");
             butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
             butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
-            flower1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.flower1.obj");
-            flower2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.flower.obj");
+            flower1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.pink_flower.obj");
+            flower2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.flower1.obj");
             skyBox = GlCube.CreateInteriorCube(Gl, "");
+            GenerateFlowerTypes();
             //UpdateCamera();
 
         }

@@ -41,13 +41,13 @@ namespace Szeminarium1_24_02_17_2
                     Silk.NET.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, p);
             }
 
-            // Set texture parameters
+            /// Set texture parameters
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Linear);
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.Repeat);
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.Repeat);
 
-            // Unbind texture
+            /// Unbind texture
             Gl.BindTexture(TextureTarget.Texture2D, 0);
 
             return texture;
