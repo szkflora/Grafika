@@ -19,6 +19,7 @@ namespace Szeminarium1_24_02_17_2
         private static SnailArrangementModel snailArrangementModel = new();
 
         private static ButterflyArrangementModel butterflyArrangementModel = new();
+        private static FlowerArrangementModel flowerArrangementModel = new();
 
         private static IWindow window;
 
@@ -28,7 +29,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static float butTime = 0.0f;
         private static float snailRotationY = 0.0f;
-        private static float moveStep = 0.05f;
+        private static float moveStep = 1f;
         private static float turnStep = 5f * (float)(Math.PI / 180f);
 
         private static Vector3D<float> snailPosition = new(0, 0, 0);
@@ -38,10 +39,14 @@ namespace Szeminarium1_24_02_17_2
         private static uint program;
 
         private static GlObject field;
-        private static GlObject snail;
+        private static GlObject snail_body;
+        private static GlObject snail_shell;
         private static GlObject butterfly_body;
         private static GlObject butterfly_wing1;
         private static GlObject butterfly_wing2;
+        private static GlObject flower1;
+        private static GlObject flower2;
+
 
         private static GlCube skyBox;
 
@@ -149,34 +154,31 @@ namespace Szeminarium1_24_02_17_2
                 return shaderReader.ReadToEnd();
         }
 
-        //private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
-        //{
-        //    switch (key)
-        //    {
-        //        case Key.Left:
-        //            cameraDescriptor.DecreaseZYAngle();
-        //            break;
-        //            ;
-        //        case Key.Right:
-        //            cameraDescriptor.IncreaseZYAngle();
-        //            break;
-        //        case Key.Down:
-        //            cameraDescriptor.IncreaseDistance();
-        //            break;
-        //        case Key.Up:
-        //            cameraDescriptor.DecreaseDistance();
-        //            break;
-        //        case Key.U:
-        //            cameraDescriptor.IncreaseZXAngle();
-        //            break;
-        //        case Key.D:
-        //            cameraDescriptor.DecreaseZXAngle();
-        //            break;
-        //        case Key.Space:
-        //            cubeArrangementModel.AnimationEnabeld = !cubeArrangementModel.AnimationEnabeld;
-        //            break;
-        //    }
-        // }
+        private static void Keyboard_KeyDown2(IKeyboard keyboard, Key key, int arg3)
+        {
+            switch (key)
+            {
+                case Key.Left:
+                    cameraDescriptor.DecreaseZYAngle();
+                    break;
+                    ;
+                case Key.Right:
+                    cameraDescriptor.IncreaseZYAngle();
+                    break;
+                case Key.Down:
+                    cameraDescriptor.IncreaseDistance();
+                    break;
+                case Key.Up:
+                    cameraDescriptor.DecreaseDistance();
+                    break;
+                case Key.U:
+                    cameraDescriptor.IncreaseZXAngle();
+                    break;
+                case Key.D:
+                    cameraDescriptor.DecreaseZXAngle();
+                    break;
+            }
+        }
 
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
@@ -261,6 +263,7 @@ namespace Szeminarium1_24_02_17_2
             DrawField();
             DrawPulsingSnail();
             DrawPulsingButterfly();
+            DrawFlowers();
 
             //ImGuiNET.ImGui.ShowDemoWindow();
             //ImGuiNET.ImGui.Begin("Lighting properties",
@@ -313,17 +316,48 @@ namespace Szeminarium1_24_02_17_2
         {
             // set material uniform to rubber
 
-            var modelMatrixForCenterCube =
-                Matrix4X4.CreateScale((float)snailArrangementModel.CenterCubeScale) *
+            var modelMatrixForSnail =
+                Matrix4X4.CreateTranslation(0f, -3.1f, 0f) *
                 Matrix4X4.CreateRotationY(snailRotationY) *
+                Matrix4X4.CreateScale(0.15f) *
                 Matrix4X4.CreateTranslation(snailPosition);
 
-
-            SetModelMatrix(modelMatrixForCenterCube);
-            Gl.BindVertexArray(snail.Vao);
-            Gl.DrawElements(GLEnum.Triangles, snail.IndexArrayLength, GLEnum.UnsignedInt, null);
+            //uint textureId = TextureLoader.LoadTextureFromResource(Gl, "projekt.Resources.snail_texture.jpeg");
+            //Gl.BindTexture(TextureTarget.Texture2D, textureId);
+            SetModelMatrix(modelMatrixForSnail);
+            Gl.BindVertexArray(snail_body.Vao);
+            Gl.DrawElements(GLEnum.Triangles, snail_body.IndexArrayLength, GLEnum.UnsignedInt, null);
             Gl.BindVertexArray(0);
 
+            SetModelMatrix(modelMatrixForSnail);
+            Gl.BindVertexArray(snail_shell.Vao);
+            Gl.DrawElements(GLEnum.Triangles, snail_shell.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+        }
+
+        private static unsafe void DrawFlowers()
+        {
+            var modelMatrixForFlower =
+               Matrix4X4.CreateTranslation(-4.0f, 0, -4.0f) *
+               Matrix4X4.CreateScale(0.07f);
+
+
+            SetModelMatrix(modelMatrixForFlower);
+            Gl.BindVertexArray(flower1.Vao);
+            Gl.DrawElements(GLEnum.Triangles, flower1.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
+
+            var modelMatrixForFlower2 =
+               Matrix4X4.CreateScale(1f) *
+               Matrix4X4.CreateTranslation(-6.0f, 0, -6.0f);
+
+
+
+            SetModelMatrix(modelMatrixForFlower2);
+            Gl.BindVertexArray(flower2.Vao);
+            Gl.DrawElements(GLEnum.Triangles, flower2.IndexArrayLength, GLEnum.UnsignedInt, null);
+            Gl.BindVertexArray(0);
         }
 
 
@@ -337,6 +371,7 @@ namespace Szeminarium1_24_02_17_2
             Matrix4X4<float> pulsing = Matrix4X4.CreateTranslation(0, yOffset, 0);
             Matrix4X4<float> bodyMatrix = scale * trans * pulsing * rotGlobY;
 
+            Gl.BindTexture(TextureTarget.Texture2D, 0);
             SetModelMatrix(bodyMatrix);
             Gl.BindVertexArray(butterfly_body.Vao);
             Gl.DrawElements(GLEnum.Triangles, butterfly_body.IndexArrayLength, GLEnum.UnsignedInt, null);
@@ -455,10 +490,13 @@ namespace Szeminarium1_24_02_17_2
                                   54/256f,
                                   1f];
             field = GlCube.CreateSquare(Gl, fieldColor);
-            snail = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail.obj");
+            snail_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail_body.obj");
+            snail_shell = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail_shell.obj");
             butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, black, "projekt.Resources.body.obj");
             butterfly_wing1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing1.obj");
             butterfly_wing2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.wing2.obj");
+            flower1 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.flower1.obj");
+            flower2 = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.flower.obj");
             skyBox = GlCube.CreateInteriorCube(Gl, "");
             //UpdateCamera();
 
@@ -473,15 +511,19 @@ namespace Szeminarium1_24_02_17_2
                     (float)Math.Cos(snailRotationY)
                 );
             Console.WriteLine($"Xx: {cameraDescriptor.Target.X}, Yy: {cameraDescriptor.Target.Y}, Zz: {cameraDescriptor.Target.Z}");
+            Console.WriteLine($"Xxx: {cameraDescriptor.Position.X}, Yyy: {cameraDescriptor.Position.Y}, Zzz: {cameraDescriptor.Position.Z}");
         }
 
         private static void Window_Closing()
         {
             field.ReleaseGlObject();
-            snail.ReleaseGlObject();
+            snail_body.ReleaseGlObject();
+            snail_shell.ReleaseGlObject();
             butterfly_body.ReleaseGlObject();
             butterfly_wing1.ReleaseGlObject();
             butterfly_wing2.ReleaseGlObject();
+            flower1.ReleaseGlObject();
+            flower2.ReleaseGlObject();
         }
 
         private static unsafe void SetProjectionMatrix()

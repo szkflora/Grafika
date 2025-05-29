@@ -25,7 +25,8 @@ namespace Szeminarium1_24_02_17_2
 
         public Vector3D<float> SnailPosition;
 
-        public Vector3D<float> SnailForward = new Vector3D<float>(0, 0, 5);
+        public Vector3D<float> SnailForward = new Vector3D<float>(0, 0, 7);
+        public Vector3D<float> SnailBackward = new Vector3D<float>(0.3f, 0, 0);
 
         public Vector3D<float> Position
         {
@@ -34,9 +35,9 @@ namespace Szeminarium1_24_02_17_2
                 switch (Mode)
                 {
                     case CameraMode.FirstPerson:
-                        return SnailPosition + new Vector3D<float>(0, 0.5f, 0) - SnailForward * 0.006f;
+                        return SnailPosition + new Vector3D<float>(0, 0.07f, 0) + SnailForward * 0.15f;// - SnailBackward;// + new Vector3D<float>(0.2f, 0, 0);
                     case CameraMode.TopDownFollow:
-                        return SnailPosition + new Vector3D<float>(0, 7f, 5f); 
+                        return SnailPosition + new Vector3D<float>(0, 7f, 1f); 
                     case CameraMode.Orbital:
                     default:
                         return GetPointFromAngles(DistanceToOrigin, AngleToZYPlane, AngleToZXPlane);
@@ -51,7 +52,7 @@ namespace Szeminarium1_24_02_17_2
                 switch (Mode)
                 {
                     case CameraMode.FirstPerson:
-                        return SnailPosition + new Vector3D<float>(0, 0.5f, 0) + SnailForward;
+                        return SnailPosition + new Vector3D<float>(0, 0.07f, 0) + SnailForward;
                     case CameraMode.TopDownFollow:
                         return SnailPosition;
                     case CameraMode.Orbital:

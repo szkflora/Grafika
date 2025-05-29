@@ -1,7 +1,9 @@
 ﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,6 +21,7 @@ namespace Szeminarium1_24_02_17_2
 
             List<float[]> objVertices;
             List<float[]> objNormals;
+            List<float[]> objTextures;
 
             List<float> glVertices = new List<float>();
             List<float> glColors = new List<float>();
@@ -43,8 +46,8 @@ namespace Szeminarium1_24_02_17_2
             if (hasVN)
             {
                 List<int[][]> objFaces;
-                ReadObjDataWithNormals(out objVertices, out objNormals, out objFaces, resource);
-                CreateGlArraysFromObjArraysWithNormals(faceColor, objVertices, objNormals, objFaces, glVertices, glColors, glIndices);
+                ReadObjDataWithNormals(out objVertices, out objNormals, out objTextures, out objFaces, resource);
+                CreateGlArraysFromObjArraysWithNormals(faceColor, objVertices, objNormals, objTextures, objFaces, glVertices, glColors, glIndices);
             }
             else
             {
@@ -61,7 +64,8 @@ namespace Szeminarium1_24_02_17_2
         {
             uint offsetPos = 0;
             uint offsetNormal = offsetPos + (3 * sizeof(float));
-            uint vertexSize = offsetNormal + (3 * sizeof(float));
+            uint offsetTexture = offsetNormal + (3 * sizeof(float));
+            uint vertexSize = offsetTexture + (2 * sizeof(float));
 
             uint vertices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
@@ -71,6 +75,9 @@ namespace Szeminarium1_24_02_17_2
 
             Gl.EnableVertexAttribArray(2);
             Gl.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, vertexSize, (void*)offsetNormal);
+
+            Gl.EnableVertexAttribArray(3);
+            Gl.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, vertexSize, (void*)offsetTexture);
 
             uint colors = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, colors);
@@ -132,23 +139,26 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
-        private static unsafe void CreateGlArraysFromObjArraysWithNormals(float[] faceColor, List<float[]> objVertices, List<float[]> objNormals, List<int[][]> objFaces, List<float> glVertices, List<float> glColors, List<uint> glIndices)
+        private static unsafe void CreateGlArraysFromObjArraysWithNormals(float[] faceColor, List<float[]> objVertices, List<float[]> objNormals, List<float[]> objTextures, List<int[][]> objFaces, List<float> glVertices, List<float> glColors, List<uint> glIndices)
         {
             Dictionary<string, int> glVertexIndices = new Dictionary<string, int>();
 
-            foreach (var objFace in objFaces)
+            void AddTriangle(int[] v0, int[] v1, int[] v2)
             {
-                for (int i = 0; i < 3; ++i)
+                foreach (var vertexData in new[] { v0, v1, v2 })
                 {
-                    int vIdx = objFace[i][0] - 1; // vertex index
-                    int vnIdx = objFace[i][2] - 1; // normal index
+                    int vIdx = vertexData[0] - 1;
+                    int vtIdx = vertexData[1] - 1;
+                    int vnIdx = vertexData[2] - 1;
 
                     float[] vertex = objVertices[vIdx];
+                    float[] texture = objTextures[vtIdx];
                     float[] normal = objNormals[vnIdx];
 
                     List<float> glVertex = new List<float>();
-                    glVertex.AddRange(vertex); // x, y, z
-                    glVertex.AddRange(normal); // nx, ny, nz
+                    glVertex.AddRange(vertex);
+                    glVertex.AddRange(normal);
+                    glVertex.AddRange(texture);
 
                     string key = string.Join(",", glVertex);
                     if (!glVertexIndices.ContainsKey(key))
@@ -161,6 +171,21 @@ namespace Szeminarium1_24_02_17_2
                     glIndices.Add((uint)glVertexIndices[key]);
                 }
             }
+
+            foreach (var objFace in objFaces)
+            {
+                if (objFace.Length == 3)
+                {
+                    AddTriangle(objFace[0], objFace[1], objFace[2]);
+                }
+                else if (objFace.Length == 4)
+                {
+                    // Split quad into two triangles: (0, 1, 2) and (0, 2, 3)
+                    AddTriangle(objFace[0], objFace[1], objFace[2]);
+                    AddTriangle(objFace[0], objFace[2], objFace[3]);
+                }
+            }
+
         }
 
         private static unsafe void ReadObjData(out List<float[]> objVertices, out List<int[]> objFaces, string resource)
@@ -199,10 +224,11 @@ namespace Szeminarium1_24_02_17_2
             }
         }
 
-        private static unsafe void ReadObjDataWithNormals(out List<float[]> objVertices, out List<float[]> objNormals, out List<int[][]> objFaces, string resource)
+        private static unsafe void ReadObjDataWithNormals(out List<float[]> objVertices, out List<float[]> objNormals, out List<float[]> objTextures, out List<int[][]> objFaces, string resource)
         {
             objVertices = new List<float[]>();
             objNormals = new List<float[]>();
+            objTextures = new List<float[]>();
             objFaces = new List<int[][]>();
             using (Stream objStream = typeof(ObjResourceReader).Assembly.GetManifestResourceStream(resource))
             using (StreamReader objReader = new StreamReader(objStream))
@@ -231,26 +257,24 @@ namespace Szeminarium1_24_02_17_2
                                 normal[i] = float.Parse(lineData[i], CultureInfo.InvariantCulture);
                             objNormals.Add(normal);
                             break;
+                        case "vt":
+                            float[] texture = new float[2];
+                            for (int i = 0; i < texture.Length; ++i)
+                                texture[i] = float.Parse(lineData[i], CultureInfo.InvariantCulture);
+                            objTextures.Add(texture);
+                            break;
                         case "f":
-                            int[][] face = new int[3][];
-                            for (int i = 0; i < 3; i++)
+                            int vertexCount = lineData.Length;
+                            int[][] face = new int[vertexCount][];
+                            for (int i = 0; i < vertexCount; i++)
                             {
-                                face[i] = new int[3];
-                            }
-
-                            int j = 0;
-                            foreach(var ld in lineData) // pl 1/2/3
-                            {
-                                var parts = ld.Split('/');
-
+                                face[i] = new int[3]; // v/vt/vn
+                                var parts = lineData[i].Split('/');
                                 for (int k = 0; k < 3; k++)
                                 {
-                                    int smth = int.Parse(parts[k]); // pl 1
-                                    face[j][k] = smth;
+                                    face[i][k] = int.Parse(parts[k]);
                                 }
-                                j++;
                             }
-
                             objFaces.Add(face);
                             break;
                     }

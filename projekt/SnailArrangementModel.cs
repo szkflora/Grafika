@@ -15,17 +15,8 @@
         /// <summary>
         /// The value by which the center cube is scaled. It varies between 0.8 and 1.2 with respect to the original size.
         /// </summary>
-        public double CenterCubeScale { get; private set; } = 1;
-
-        /// <summary>
-        /// The angle with which the diamond cube is rotated around the diagonal from bottom right front to top left back.
-        /// </summary>
-        public double DiamondCubeAngleOwnRevolution { get; private set; } = 0;
-
-        /// <summary>
-        /// The angle with which the diamond cube is rotated around the diagonal from bottom right front to top left back.
-        /// </summary>
-        public double DiamondCubeAngleRevolutionOnGlobalY { get; private set; } = 0;
+        public double Scale { get; private set; } = 1;
+        
 
         internal void AdvanceTime(double deltaTime)
         {
@@ -37,11 +28,8 @@
             Time += deltaTime;
 
             // lets produce an oscillating scale in time
-            CenterCubeScale = 1 + 0.2 * System.Math.Sin(1.5 * Time);
+            Scale = 1 + 0.2 * System.Math.Sin(1.5 * Time);
 
-            DiamondCubeAngleOwnRevolution = Time * 10;
-
-            DiamondCubeAngleRevolutionOnGlobalY = -Time;
         }
     }
 }
