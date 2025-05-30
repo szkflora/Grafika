@@ -8,8 +8,10 @@ using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Text.RegularExpressions;
 
 namespace Szeminarium1_24_02_17_2
 {
@@ -49,9 +51,10 @@ namespace Szeminarium1_24_02_17_2
         private static GlObject butterfly_wing2;
         private static GlObject flower1;
         private static GlObject flower2;
-
-
         private static GlCube skyBox;
+
+        private static float snailRadius = 0.8f;
+        private static float flowerRadius = 0.1f;
 
         private static float Shininess = 50;
 
@@ -264,6 +267,7 @@ namespace Szeminarium1_24_02_17_2
 
             DrawSkyBox();
             DrawField();
+            //DrawCube();
             DrawPulsingSnail();
             DrawPulsingButterfly();
             DrawFlowers();
@@ -369,6 +373,20 @@ namespace Szeminarium1_24_02_17_2
             
             for (int i = 0; i < 50; i ++)
             {
+                if (flowers[i][0] == -1) continue;
+
+                float dx = snailPosition.X - flowers[i][1];
+                float dz = snailPosition.Z - flowers[i][2];
+                float distance_2 = dx * dx - dz * dz;
+                float distance = snailRadius + flowerRadius;
+
+                if(distance_2 < distance * distance)
+                {
+                    flowers[i][0] = -1;
+                }
+
+                if (flowers[i][0] == -1) continue;
+
                 if (flowers[i][0] == 0)
                 {
                     var modelMatrixForFlower = originalModelMatrixForFlower * Matrix4X4.CreateTranslation(flowers[i][1], 0f, flowers[i][2]);
@@ -520,6 +538,7 @@ namespace Szeminarium1_24_02_17_2
                                   54/256f,
                                   1f];
             field = GlCube.CreateSquare(Gl, fieldColor);
+            //cube = GlCube.CreateCubeWithFaceColors(Gl, black, black, black, black, black, black);
             snail_body = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail_body.obj");
             snail_shell = ObjResourceReader.CreateObjWithColor(Gl, nicestColorEver, "projekt.Resources.snail_shell.obj");
             butterfly_body = ObjResourceReader.CreateObjWithColor(Gl, black, "projekt.Resources.body.obj");
