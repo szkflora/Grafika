@@ -23,6 +23,7 @@ namespace Szeminarium1_24_02_17_2
 
         private static ButterflyArrangementModel butterflyArrangementModel = new();
         private static FlowerArrangementModel flowerArrangementModel = new();
+        private static ImGuiController controller;
 
         private static IWindow window;
 
@@ -38,6 +39,8 @@ namespace Szeminarium1_24_02_17_2
         private static int[][] flowers = new int[50][];
 
         private static Vector3D<float> snailPosition = new(0, 0, 0);
+        private static int viewIndex = 0;
+
 
         //private static ImGuiController controller;
 
@@ -102,7 +105,7 @@ namespace Szeminarium1_24_02_17_2
 
             Gl = window.CreateOpenGL();
 
-            //controller = new ImGuiController(Gl, window, inputContext);
+            controller = new ImGuiController(Gl, window, inputContext);
 
             // Handle resizes
             window.FramebufferResize += s =>
@@ -160,31 +163,6 @@ namespace Szeminarium1_24_02_17_2
                 return shaderReader.ReadToEnd();
         }
 
-        private static void Keyboard_KeyDown2(IKeyboard keyboard, Key key, int arg3)
-        {
-            switch (key)
-            {
-                case Key.Left:
-                    cameraDescriptor.DecreaseZYAngle();
-                    break;
-                    ;
-                case Key.Right:
-                    cameraDescriptor.IncreaseZYAngle();
-                    break;
-                case Key.Down:
-                    cameraDescriptor.IncreaseDistance();
-                    break;
-                case Key.Up:
-                    cameraDescriptor.DecreaseDistance();
-                    break;
-                case Key.U:
-                    cameraDescriptor.IncreaseZXAngle();
-                    break;
-                case Key.D:
-                    cameraDescriptor.DecreaseZXAngle();
-                    break;
-            }
-        }
 
         private static void Keyboard_KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
@@ -211,23 +189,6 @@ namespace Szeminarium1_24_02_17_2
                     snailPosition.Z += (float)Math.Cos(snailRotationY) * moveStep;
                     UpdateCamera();
                     break;
-                case Key.Down:
-                    cameraDescriptor.DecreaseDistance();
-                    break;
-                case Key.U:
-                    cameraDescriptor.IncreaseZXAngle();
-                    break;
-                case Key.D:
-                    cameraDescriptor.DecreaseZXAngle();
-                    break;
-                case Key.Space:
-                    snailArrangementModel.AnimationEnabeld = !snailArrangementModel.AnimationEnabeld;
-                    break;
-                case Key.V:
-                    UpdateCamera();
-                    cameraDescriptor.Mode = cameraDescriptor.Mode == CameraMode.FirstPerson ? CameraMode.TopDownFollow : CameraMode.FirstPerson;
-                    break;
-                    
             }
         }
 
@@ -241,7 +202,7 @@ namespace Szeminarium1_24_02_17_2
             butterflyArrangementModel.AdvanceTime(deltaTime);
             butTime += (float)deltaTime;
 
-            //controller.Update((float)deltaTime);
+            controller.Update((float)deltaTime);
         }
 
         private static unsafe void Window_Render(double deltaTime)
@@ -272,14 +233,24 @@ namespace Szeminarium1_24_02_17_2
             DrawPulsingButterfly();
             DrawFlowers();
 
-            //ImGuiNET.ImGui.ShowDemoWindow();
-            //ImGuiNET.ImGui.Begin("Lighting properties",
-            //    ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-            //ImGuiNET.ImGui.SliderFloat("Shininess", ref Shininess, 1, 200);
-            //ImGuiNET.ImGui.End();
+            ImGuiNET.ImGui.Begin("View properties",
+                ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
+            ImGuiNET.ImGui.Text("Views");
+            string[] viewNames = { "first person", "top down follow" };
+            ImGuiNET.ImGui.Combo("Views", ref viewIndex, viewNames, viewNames.Length);
+            ImGuiNET.ImGui.End();
 
+            if (viewIndex == 0)
+            {
+                cameraDescriptor.Mode = CameraMode.FirstPerson;
+            }
+            else
+            {
+                cameraDescriptor.Mode = CameraMode.TopDownFollow;
+            }
+            UpdateCamera();
 
-            //controller.Render();
+            controller.Render();
         }
 
         private static unsafe void DrawSkyBox()
@@ -377,7 +348,7 @@ namespace Szeminarium1_24_02_17_2
 
                 float dx = snailPosition.X - flowers[i][1];
                 float dz = snailPosition.Z - flowers[i][2];
-                float distance_2 = dx * dx - dz * dz;
+                float distance_2 = dx * dx + dz * dz;
                 float distance = snailRadius + flowerRadius;
 
                 if(distance_2 < distance * distance)
